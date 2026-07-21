@@ -1,0 +1,2214 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>Smarter RekenApp - Groep 4 t/m 7</title>
+
+    <!-- iPad Portretmodus Optimalisatie -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RekenApp">
+
+    <style>
+        :root {
+            --bg-main: #f4f7fe;
+            --bg-card: #ffffff;
+            --text-main: #1b2559;
+            --text-muted: #a3aed0;
+            --primary: #4318ff;
+            --primary-light: #f4f2ff;
+            --success: #05cd99;
+            --danger: #ee5d50;
+            --warning: #ff9800;
+            --border: #e0e5f2;
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0; padding: 0;
+            font-family: var(--font);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .app-window {
+            width: 100%;
+            max-width: 768px;
+            min-height: 100vh;
+            background-color: var(--bg-main);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding-bottom: 40px;
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+
+        .visually-hidden {
+            position: absolute; width: 1px; height: 1px;
+            padding: 0; margin: -1px; overflow: hidden;
+            clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+        }
+
+        /* Top Bar Navigation */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .profile-area { display: flex; align-items: center; gap: 14px; }
+        .profile-info h1 { font-size: 18px; font-weight: 700; }
+        .profile-info p { font-size: 13px; color: var(--text-muted); }
+
+        .btn-home {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            appearance: none;
+        }
+
+        .score-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+
+        .score-badge {
+            background: #fff3e0;
+            color: var(--warning);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .btn-reset-points {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: underline;
+            appearance: none;
+        }
+
+        /* Views */
+        .view { display: none; flex-direction: column; flex: 1; padding: 24px; }
+        .view.active { display: flex; }
+
+        h2.section-title { font-size: 20px; font-weight: 800; margin: 20px 0 10px 0; }
+        .view > h2.section-title:first-child { margin-top: 4px; }
+        .sub-text { font-size: 13px; color: var(--text-muted); margin-bottom: 14px; }
+
+        /* Dashboard Grid & Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        button.tile {
+            appearance: none;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 11px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-height: 72px;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.01);
+            transition: all 0.2s;
+            text-align: left;
+            font: inherit;
+            color: inherit;
+        }
+        .tile.active { border-color: var(--primary); background-color: #f9f8ff; }
+        .tile.tile-wide { grid-column: span 2; }
+        .tile-icon { font-size: 21px; width: 38px; height: 38px; background: var(--bg-main); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .tile h3 { font-size: 14px; font-weight: 700; }
+        .tile p { font-size: 10px; color: var(--text-muted); }
+
+        .tile:focus-visible, .btn-sub:focus-visible, .btn-action:focus-visible,
+        .btn-home:focus-visible, .som-input:focus-visible, .splits-input-box:focus-visible {
+            outline: 3px solid var(--primary);
+            outline-offset: 2px;
+        }
+
+        .config-block {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .config-block h4 { margin-bottom: 12px; font-size: 14px; font-weight: 700; color: var(--text-main); }
+        .config-block legend { font-size: 14px; font-weight: 700; color: var(--text-main); margin-bottom: 12px; padding: 0; }
+        .config-block fieldset { border: none; padding: 0; margin: 0; }
+        .custom-lengte-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+        .custom-lengte-row label { font-size: 13px; font-weight: 600; color: var(--text-main); }
+        .custom-lengte-row input[type="number"] {
+            width: 100px; height: 40px; border-radius: 8px; border: 2px solid var(--border);
+            background: var(--bg-main); color: var(--text-main); font-size: 14px; text-align: center;
+            font-weight: 700; outline: none; font: inherit;
+        }
+        .custom-lengte-row input[type="number"]:focus { border-color: var(--primary); background: #fff; }
+        .custom-lengte-row .btn-sub { flex: 0 0 auto; padding: 10px 14px; }
+
+        /* Knoppen Groepen */
+        .btn-group { display: flex; gap: 8px; width: 100%; flex-wrap: wrap; }
+        button.btn-sub {
+            appearance: none;
+            flex: 1; min-width: 65px; padding: 12px; background: var(--bg-main);
+            border: 1px solid transparent; border-radius: 10px;
+            font-weight: 700; font-size: 13px; color: var(--text-main);
+            cursor: pointer; text-align: center; font: inherit;
+        }
+        .btn-sub.active { background: var(--primary); color: white; }
+
+        button.btn-action {
+            appearance: none;
+            background: var(--primary); color: white; border: none; padding: 18px;
+            border-radius: 16px; font-weight: 700; font-size: 17px; cursor: pointer;
+            width: 100%; text-align: center; box-shadow: 0 4px 12px rgba(67, 24, 255, 0.15);
+            margin-top: 10px; font: inherit;
+        }
+        .btn-action.btn-alert { background: var(--warning); }
+        .btn-reset-scores {
+            margin-top: 14px;
+            background: #fff;
+            color: var(--danger);
+            border: 1px solid #ffcdd2;
+            box-shadow: none;
+        }
+
+        /* Quick Stats Grid */
+        .quick-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .stat-mini-card {
+            background: var(--bg-main);
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        .stat-mini-card p { font-size: 10px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+        .stat-mini-card h3 { font-size: 14px; font-weight: 700; color: var(--text-main); margin-top: 2px; }
+        .stat-good { color: var(--success); }
+
+        /* Progress Stats Styles */
+        .stats-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+        .stats-table th, .stats-table td { padding: 8px 6px; text-align: left; font-size: 12px; border-bottom: 1px solid var(--border); }
+        .stats-table th { font-weight: 700; color: var(--text-muted); }
+
+        .progress-bar-bg { background: #e0e5f2; border-radius: 4px; width: 70px; height: 6px; display: inline-block; vertical-align: middle; margin-right: 6px; overflow: hidden; }
+        .progress-bar-fill { background: var(--success); height: 100%; width: 0%; transition: width 0.3s; }
+        .level-badge { font-weight: 700; font-size: 11px; padding: 2px 5px; border-radius: 5px; white-space: nowrap; }
+
+
+        /* Compact voortgangsoverzicht en onderknoppen */
+        .progress-compact-card { padding: 10px !important; }
+        .quick-stats-grid { gap: 6px; margin-bottom: 8px; }
+        .stat-mini-card { padding: 8px 9px; min-height: 54px; }
+        .stat-mini-card p { font-size: 9px; line-height: 1.15; }
+        .stat-mini-card h3 { font-size: 13px; line-height: 1.2; }
+        .stats-table thead { display: none; }
+        .stats-table tbody {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 7px;
+        }
+        .stats-table tr {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 3px 7px;
+            align-items: center;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-main);
+        }
+        .stats-table td { padding: 0; border: 0; font-size: 11px; }
+        .stats-table td:first-child { grid-column: 1 / -1; font-weight: 700; }
+        .stats-table td:nth-child(2) { color: var(--text-muted); }
+        .stats-table td:nth-child(3) { justify-self: end; }
+        .bottom-action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+        button.btn-bottom-small { margin-top: 0; padding: 12px 10px; border-radius: 12px; font-size: 13px; box-shadow: none; }
+        button.btn-info-page { background: var(--primary-light); color: var(--primary); border: 1px solid #d8d0ff; }
+        button.btn-reset-scores.btn-bottom-small { background: #fff; color: var(--danger); border: 1px solid #ffcdd2; }
+
+        /* Informatie- en leerdoelenpagina */
+        .info-hero { background: linear-gradient(135deg, #f4f2ff, #eef7ff); border: 1px solid #d8d0ff; border-radius: 18px; padding: 18px; margin-bottom: 14px; }
+        .info-hero h2 { font-size: 22px; margin-bottom: 6px; }
+        .info-hero p { font-size: 13px; line-height: 1.55; }
+        .info-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+        .info-section h3 { font-size: 16px; margin-bottom: 9px; }
+        .info-section p, .info-section li { font-size: 13px; line-height: 1.55; }
+        .info-section ul { margin: 7px 0 0 19px; }
+        .info-summary-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .info-summary-card { background: var(--bg-main); border: 1px solid var(--border); border-radius: 11px; padding: 10px; }
+        .info-summary-card strong { display: block; font-size: 16px; color: var(--primary); }
+        .info-summary-card span { font-size: 11px; color: var(--text-muted); }
+        .info-table { width: 100%; border-collapse: collapse; }
+        .info-table th, .info-table td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); font-size: 12px; vertical-align: top; }
+        .info-table th { color: var(--text-muted); font-weight: 700; }
+        .info-note { font-size: 11px !important; color: var(--text-muted); margin-top: 8px; }
+        .level-goals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+        .level-goal { background: var(--bg-main); border: 1px solid var(--border); border-radius: 11px; padding: 10px; }
+        .level-goal h4 { font-size: 13px; margin-bottom: 4px; }
+        .level-goal p { font-size: 11px; color: #5b6280; }
+        @media (max-width: 560px) {
+            .stats-table tbody, .info-summary-grid, .level-goals { grid-template-columns: 1fr; }
+        }
+
+        /* WERKBLAD INDELING */
+        .category-header {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 800;
+            margin: 24px 0 12px 0;
+            border-left: 5px solid var(--primary);
+        }
+
+        .worksheet-container { display: flex; flex-direction: column; gap: 14px; }
+
+        .som-row {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        /* Visueel splitsen schema: duidelijke splitsboom */
+        .visual-splits-diagram { display:flex; flex-direction:column; align-items:center; margin:8px auto; width:190px; }
+        .splits-top { width:62px; height:62px; border-radius:50%; border:3px solid var(--text-main); display:flex; align-items:center; justify-content:center; background:#fff; color:var(--text-main); font-weight:900; font-size:19px; padding:0; }
+        .splits-branches { display:flex; justify-content:space-between; width:116px; height:36px; position:relative; padding-top:0; }
+        .splits-branches::before { content:''; position:absolute; top:0; left:50%; width:3px; height:14px; background:var(--text-main); transform:translateX(-50%); }
+        .splits-branches::after { content:''; position:absolute; top:13px; left:8px; right:8px; height:3px; background:var(--text-main); }
+        .splits-left, .splits-rechts { position:absolute; top:26px; width:58px; height:58px; border:3px solid var(--text-main); border-radius:10px; display:flex; align-items:center; justify-content:center; background:#fff; font-size:17px; font-weight:800; padding:0; }
+        .splits-left { left:-18px; } .splits-rechts { right:-18px; }
+        .splits-input-box { width:48px; height:46px; border:0; border-radius:7px; text-align:center; font-weight:900; background:var(--primary-light); color:var(--text-main); font:inherit; font-size:17px; }
+
+
+        .som-vraag { font-size: 16px; font-weight: 700; line-height: 1.4; white-space: pre-line; flex: 1; }
+        .som-input-wrapper { width: 160px; display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
+
+        .som-input {
+            width: 100%; max-width: 110px; height: 44px; border-radius: 8px;
+            border: 2px solid var(--border); background: var(--bg-main);
+            color: var(--text-main); font-size: 16px; text-align: center; font-weight: 700; outline: none;
+            font: inherit;
+        }
+        .som-input:focus { border-color: var(--primary); background: #ffffff; }
+
+        /* Nakijk Statussen */
+        .som-row.correct { border-color: var(--success); background: #e6fcf5; }
+        .som-row.incorrect { border-color: var(--danger); background: #fff5f5; }
+        .som-row.unanswered { border-color: var(--warning); background: #fff8e1; }
+        .feedback-icon { font-size: 18px; display: none; }
+        .som-row.correct .feedback-icon,
+        .som-row.incorrect .feedback-icon,
+        .som-row.unanswered .feedback-icon { display: inline; }
+        .som-row.correct .feedback-icon { color: var(--success); }
+        .som-row.incorrect .feedback-icon,
+        .som-row.unanswered .feedback-icon { color: var(--danger); }
+
+        .res-row { display: flex; justify-content: space-between; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 12px; }
+
+        .eval-card { background: white; border: 1px solid var(--border); border-radius: 24px; padding: 32px; text-align: center; margin-top: 20px; }
+        .eval-score { font-size: 44px; color: var(--primary); }
+        .eval-feedback { font-size: 18px; font-weight: 700; margin: 16px 0; }
+        .eval-points { color: var(--warning); font-weight: 700; font-size: 16px; margin-bottom: 32px; }
+        .history-card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 6px; }
+        .empty-hint { padding: 6px; color: var(--text-muted); font-size: 11px; }
+
+
+        /* Niveau, uitleg en kladblok */
+        .info-card { background:#eef7ff; border:1px solid #b8dcff; border-radius:16px; padding:16px; margin:12px 0 18px; }
+        .info-card h3 { font-size:16px; margin-bottom:8px; }
+        .info-card p, .info-card li { font-size:13px; line-height:1.5; }
+        .info-card ul { margin:8px 0 0 20px; }
+        details.explanation { background:#fff; border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:14px; }
+        details.explanation summary { cursor:pointer; font-weight:800; color:var(--primary); }
+        details.explanation .explanation-body { padding-top:10px; font-size:13px; line-height:1.55; }
+        .unit-hint { font-size:12px; color:var(--text-muted); margin-top:4px; }
+
+        /* Opgavekaart met eigen kladblok en uitleg */
+        .som-row { align-items:flex-start; flex-wrap:wrap; }
+        .som-main { flex:1 1 430px; min-width:0; display:flex; align-items:center; gap:14px; }
+        .som-tools { flex:0 0 auto; display:flex; gap:8px; align-items:center; }
+        .som-tool-btn { width:38px; height:38px; border:1px solid var(--border); background:#fff; color:var(--text-main); border-radius:9px; padding:0; font-size:19px; line-height:1; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
+        .som-tool-btn:hover, .som-tool-btn[aria-expanded="true"] { border-color:var(--primary); background:var(--primary-light); color:var(--primary); }
+        .som-panel { width:100%; display:none; border-top:1px solid var(--border); padding-top:12px; margin-top:2px; }
+        .som-panel.open { display:block; }
+        .som-panel-grid { display:grid; grid-template-columns:minmax(0, 1fr) minmax(250px, 360px); gap:14px; align-items:start; }
+        .strategy-card { background:#eef7ff; border:1px solid #b8dcff; border-radius:12px; padding:13px; font-size:13px; line-height:1.55; }
+        .strategy-card h4 { margin:0 0 7px; color:var(--primary); font-size:14px; }
+        .strategy-card ol { margin:7px 0 0 20px; padding:0; }
+        .strategy-example { margin-top:9px; padding:8px 10px; background:#fff; border-radius:8px; font-weight:700; white-space:pre-line; }
+        .mini-scratch { background:#fffdf1; border:2px solid #f0d66b; border-radius:12px; padding:10px; }
+        .mini-scratch-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:7px; font-size:13px; font-weight:800; }
+        .mini-scratch-actions { display:flex; gap:6px; }
+        .mini-scratch-actions button, .scratch-mode-btn { border:none; background:#fff3b0; color:#6b5600; border-radius:7px; padding:6px 8px; font-weight:800; cursor:pointer; }
+        .scratch-canvas { display:none; width:100%; height:190px; touch-action:none; background:repeating-linear-gradient(#fffdf1,#fffdf1 30px,#e8dfb8 31px); border:1px dashed #b79b2e; border-radius:8px; cursor:crosshair; }
+        .scratch-canvas.active { display:block; }
+        .scratch-textarea { display:block; width:100%; min-height:190px; resize:vertical; border:1px dashed #b79b2e; border-radius:8px; padding:12px; font:600 16px/1.8 inherit; background:repeating-linear-gradient(#fffdf1,#fffdf1 30px,#e8dfb8 31px); color:var(--text-main); }
+        .scratch-textarea.hidden { display:none; }
+        .scratch-mode-switch { display:flex; gap:6px; margin-bottom:8px; }
+        .scratch-mode-btn.active { background:var(--primary); color:#fff; }
+        .strategy-example { white-space:pre-line; line-height:1.65; }
+
+        @media (max-width: 800px) {
+            .som-main { flex-basis:100%; align-items:flex-start; }
+            .som-tools { width:100%; justify-content:flex-end; }
+            .som-panel-grid { grid-template-columns:1fr; }
+            .scratch-canvas { height:220px; }
+            .som-tool-btn { flex:1; }
+        }
+
+
+        .level-picker .btn-sub { min-width: 92px; }
+        .visual-clock { width:124px; height:124px; border:4px solid var(--text-main); border-radius:50%; position:relative; background:#fff; margin:4px auto 12px; flex-shrink:0; }
+        .visual-clock::after { content:''; position:absolute; width:8px; height:8px; border-radius:50%; background:#111; left:54px; top:54px; z-index:8; }
+        .clock-tick { position:absolute; left:50%; top:3px; width:2px; height:7px; background:#9aa3b8; transform-origin:1px 55px; }
+        .clock-tick.major { width:3px; height:11px; background:var(--text-main); }
+        .clock-hand { position:absolute; left:50%; bottom:50%; transform-origin:bottom center; border-radius:4px; }
+        .clock-hand.minute { width:3px; height:42px; background:#111; }
+        .clock-hand.hour { width:5px; height:30px; background:var(--primary); }
+        .clock-number { position:absolute; font-size:11px; font-weight:800; transform:translate(-50%,-50%); }
+        .money-visual { display:flex; flex-wrap:wrap; gap:9px; margin:6px 0 12px; align-items:center; padding:10px; border-radius:12px; background:#f7f9ff; border:1px solid var(--border); }
+        .money-chip { position:relative; display:inline-flex; align-items:center; justify-content:center; width:76px; height:40px; padding:0 8px; border:2px solid #46704d; border-radius:5px; background:linear-gradient(135deg,#b8d8b0,#e9f3d9); color:#23482b; font-weight:900; font-size:14px; box-shadow:0 3px 6px rgba(0,0,0,.12); }
+        .money-chip::before { content:'€'; position:absolute; left:7px; top:5px; font-size:10px; opacity:.55; }
+        .money-chip.bill20 { background:linear-gradient(135deg,#a9caeb,#e6f1fb); border-color:#4779a8; color:#234c72; }
+        .money-chip.bill50 { background:linear-gradient(135deg,#efc48d,#fff0d5); border-color:#b47730; color:#754512; }
+        .money-chip.bill10 { background:linear-gradient(135deg,#e6a79d,#f9ddd8); border-color:#a95d52; color:#6c2c24; }
+        .money-chip.bill5 { background:linear-gradient(135deg,#b8c8c0,#e7eeea); border-color:#607c6e; color:#344b40; }
+        .money-chip.coin { min-width:38px; width:38px; height:38px; border-radius:50%; padding:0; background:radial-gradient(circle at 35% 30%,#fff,#d5d9de 58%,#9ca3af); border-color:#8b929c; color:#30343a; }
+        .money-chip.coin.gold { background:radial-gradient(circle at 35% 30%,#fff6ae,#e3bd38 60%,#987715); border-color:#9b7b18; color:#533e00; }
+        .money-chip.coin.copper { background:radial-gradient(circle at 35% 30%,#ffd0a8,#c97839 60%,#82451d); border-color:#8c4d22; color:#fff; font-size:11px; }
+        .som-custom { margin-right:12px; }
+        @media (max-width:560px){ .level-picker .btn-sub{min-width:calc(50% - 8px);} }
+
+        .student-switcher { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+        .student-select { border:1px solid var(--border); background:#fff; color:var(--text-main); border-radius:10px; padding:8px 10px; font-weight:700; max-width:150px; }
+        .student-add { border:1px solid var(--border); background:var(--primary-light); color:var(--primary); border-radius:10px; width:36px; height:36px; font-size:18px; font-weight:900; cursor:pointer; }
+        .reward-progress { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:12px 14px; margin-bottom:14px; }
+        .reward-progress-head { display:flex; justify-content:space-between; gap:12px; font-size:13px; font-weight:800; margin-bottom:8px; }
+        .reward-track { height:12px; background:#e8ecf7; border-radius:999px; overflow:hidden; }
+        .reward-fill { height:100%; width:0; background:linear-gradient(90deg,#ffb300,#ff7a00); border-radius:inherit; transition:width .35s ease; }
+        .reward-modal { position:fixed; inset:0; background:rgba(17,24,39,.62); z-index:5000; display:none; align-items:center; justify-content:center; padding:20px; }
+        .reward-modal.open { display:flex; }
+        .reward-card { width:min(430px,100%); background:#fff; border-radius:24px; padding:28px; text-align:center; box-shadow:0 22px 70px rgba(0,0,0,.28); }
+        .reward-icon { font-size:72px; line-height:1; margin-bottom:12px; }
+        .reward-card h2 { font-size:28px; margin-bottom:8px; }
+        .reward-card p { line-height:1.55; margin-bottom:18px; }
+        @media(max-width:700px){ .top-nav{align-items:flex-start;} .score-container{flex-direction:column;align-items:flex-end;} .student-select{max-width:120px;} }
+
+        /* Compacte visuele opgaven voor informatie, patronen en getallenlijn */
+        .mini-data-table { border-collapse: collapse; margin: 8px 0 4px; font-size: 14px; }
+        .mini-data-table th, .mini-data-table td { border: 1px solid var(--border); padding: 6px 10px; text-align: center; }
+        .mini-data-table th { background: var(--primary-light); }
+        .bar-chart-shell { display:flex; gap:8px; align-items:stretch; margin:8px 0 12px; }
+        .bar-y-axis { display:flex; flex-direction:column; justify-content:space-between; min-height:132px; padding:0 0 22px; font-size:11px; font-weight:800; color:#4b5563; text-align:right; }
+        .bar-chart { flex:1; display:flex; align-items:flex-end; gap:12px; min-height:132px; padding:10px 10px 24px; border-left:2px solid var(--text-main); border-bottom:2px solid var(--text-main); background:repeating-linear-gradient(to top,transparent 0,transparent 23px,#e8ecf5 24px); margin:0; }
+        .bar-wrap { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:90px; min-width:42px; font-size:11px; }
+        .bar { width:30px; background:var(--primary); border-radius:5px 5px 0 0; min-height:5px; }
+        .bar-label { margin-top:5px; font-weight:700; }
+        .bar-value { font-size:11px; font-weight:900; margin-bottom:3px; color:var(--text-main); }
+        .number-line { position:relative; height:78px; margin:20px 18px 6px; border-top:4px solid var(--text-main); min-width:300px; }
+        .number-line .tick { position:absolute; top:-9px; width:3px; height:18px; background:var(--text-main); transform:translateX(-50%); }
+        .number-line .tick.minor { width:2px; height:12px; background:#7b8499; }
+        .number-line .tick-label { position:absolute; top:15px; transform:translateX(-50%); font-size:13px; font-weight:800; white-space:nowrap; }
+        .number-line .marker { position:absolute; top:-35px; transform:translateX(-50%); font-size:24px; color:#d84315; }
+    </style>
+</head>
+<body>
+
+<div class="app-window">
+
+    <!-- Top Navigatiebalk -->
+    <header class="top-nav">
+        <div class="profile-area">
+            <button class="btn-home" type="button" data-action="terug-naar-home">🏠 Home</button>
+            <div class="profile-info">
+                <h1>Mijn Reken Dashboard</h1>
+                <p id="headerLevelText">Kies je niveau</p>
+            </div>
+        </div>
+        <div class="score-container">
+            <div class="student-switcher" aria-label="Kies leerling">
+                <select id="studentSelect" class="student-select" aria-label="Actieve leerling"></select>
+                <button class="student-add" type="button" data-action="voeg-leerling-toe" title="Nieuwe leerling toevoegen" aria-label="Nieuwe leerling toevoegen">+</button>
+            </div>
+            <div class="score-badge">Punten: 🏆 <span id="xpDisplay">0</span></div>
+            <button class="btn-reset-points" type="button" data-action="reset-punten">🗑️ reset punten</button>
+        </div>
+    </header>
+
+    <main>
+    <!-- VIEW 1: CONFIGURATIE & OPTIES -->
+    <section id="view-dashboard" class="view active" aria-label="Dashboard">
+
+        <h2 class="section-title">1. Kies je niveau 📚</h2>
+        <div class="config-block level-picker">
+            <div class="btn-group" id="niveauGroep">
+                <button class="btn-sub" type="button" data-action="set-niveau" data-niveau="begin4">Begin 4</button>
+                <button class="btn-sub" type="button" data-action="set-niveau" data-niveau="midden4">Midden 4</button>
+                <button class="btn-sub" type="button" data-action="set-niveau" data-niveau="begin5">Begin 5</button>
+                <button class="btn-sub" type="button" data-action="set-niveau" data-niveau="midden5">Midden 5</button>
+                <button class="btn-sub active" type="button" data-action="set-niveau" data-niveau="groep6">Groep 6</button>
+                <button class="btn-sub" type="button" data-action="set-niveau" data-niveau="groep7">Groep 7</button>
+            </div>
+            <p class="sub-text" id="niveauUitleg">Groep 6: introductie van breuken, basisprocenten, meten en rekenen tot 100.000.</p>
+        </div>
+
+        <h2 class="section-title">2. Kies je oefeningen 🎯</h2>
+        <p class="sub-text">Je ziet alleen onderdelen die bij het gekozen niveau passen:</p>
+
+        <div class="dashboard-grid" id="tileGrid" role="group" aria-label="Kies oefeningen">
+            <!-- tegels worden door JavaScript ingevuld op basis van CATEGORIES -->
+        </div>
+
+        <!-- Sub-panel: Tafel Selectie vooraf -->
+        <div class="config-block" id="tafelInlinePanel" style="display:none;">
+            <h4 id="tafelPanelTitel">Kies welke tafels mee mogen doen op het blad:</h4>
+            <div class="btn-group" id="tafelSubCheckboxes" role="group" aria-labelledby="tafelPanelTitel"></div>
+        </div>
+
+        <!-- Instelling Aantal sommen per geselecteerde oefening -->
+        <div class="config-block">
+            <fieldset>
+                <legend>3. Aantal opdrachten PER OEFENING:</legend>
+                <p class="sub-text">Kies hoeveel sommen ELK gekozen onderdeel apart krijgt:</p>
+                <div class="btn-group" id="lengteGroep">
+                    <button class="btn-sub active" type="button" data-action="set-lengte" data-lengte="10">10 sommen</button>
+                    <button class="btn-sub" type="button" data-action="set-lengte" data-lengte="15">15 sommen</button>
+                    <button class="btn-sub" type="button" data-action="set-lengte" data-lengte="20">20 sommen</button>
+                    <button class="btn-sub" type="button" data-action="set-lengte" data-lengte="50">50 sommen</button>
+                </div>
+            </fieldset>
+        </div>
+
+        <!-- Instelling Getalbereik (+/- sommen) -->
+        <div class="config-block">
+            <fieldset>
+                <legend>4. Getalbereik voor optellen en aftrekken:</legend>
+                <div class="btn-group" id="bereikGroep">
+                    <button class="btn-sub active" type="button" data-action="set-bereik" data-bereik="1000">Tot 1.000</button>
+                    <button class="btn-sub" type="button" data-action="set-bereik" data-bereik="10000">Tot 10.000</button>
+                    <button class="btn-sub" type="button" data-action="set-bereik" data-bereik="100000">Tot 100.000</button>
+                </div>
+            </fieldset>
+        </div>
+
+
+
+        <div class="reward-progress" aria-label="Voortgang naar beloning">
+            <div class="reward-progress-head"><span>🎁 Beloning bij 500 punten</span><span id="rewardProgressText">0 / 500</span></div>
+            <div class="reward-track"><div class="reward-fill" id="rewardProgressFill"></div></div>
+        </div>
+
+        <button class="btn-action" type="button" data-action="genereer-werkblad">Oefenblad Genereren 🚀</button>
+
+        <!-- Voortgangs & Statistieken Dashboard -->
+        <h2 class="section-title">Mijn Voortgang &amp; Medailles 📊</h2>
+        <div class="config-block progress-compact-card">
+
+            <div class="quick-stats-grid">
+                <div class="stat-mini-card">
+                    <p>Sommen Gemaakt</p>
+                    <h3 id="statTotaalSommen">0</h3>
+                </div>
+                <div class="stat-mini-card">
+                    <p>Totaal Goed</p>
+                    <h3 id="statTotaalGoed" class="stat-good">0</h3>
+                </div>
+                <div class="stat-mini-card">
+                    <p>Beste Onderdeel 🏆</p>
+                    <h3 id="statBesteOnderdeel">-</h3>
+                </div>
+                <div class="stat-mini-card">
+                    <p>Extra Oefenen ⚠️</p>
+                    <h3 id="statMinderOnderdeel">-</h3>
+                </div>
+            </div>
+
+            <!-- Tabel met Voortgangsbalk en Medailles -->
+            <table class="stats-table">
+                <caption class="visually-hidden">Voortgang per onderdeel</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Onderdeel</th>
+                        <th scope="col">Score</th>
+                        <th scope="col">Niveau</th>
+                    </tr>
+                </thead>
+                <tbody id="statsTableBody">
+                    <!-- Wordt dynamisch geladen via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="section-title">Eerder behaalde resultaten 📈</h2>
+        <div id="historyContainer" class="history-card"></div>
+        <div class="bottom-action-row" aria-label="Dashboardacties">
+            <button class="btn-action btn-reset-scores btn-bottom-small" type="button" data-action="reset-scores">🗑️ Scores resetten</button>
+            <button class="btn-action btn-info-page btn-bottom-small" type="button" data-action="open-info">ℹ️ Info &amp; leerdoelen</button>
+        </div>
+    </section>
+
+
+    <!-- VIEW: INFORMATIE & LEERDOELEN -->
+    <section id="view-info" class="view" aria-label="Informatie en leerdoelen">
+        <div class="info-hero">
+            <h2>ℹ️ Over deze RekenApp</h2>
+            <p>Deze oefenapp ondersteunt een doorlopende rekenopbouw van Begin 4 tot en met Groep 7. De oefeningen zijn nieuw en zelf samengesteld. De app gebruikt geen gekopieerde Cito-toetsvragen of methodepagina’s.</p>
+        </div>
+
+        <div class="info-section">
+            <h3>Wat is toegevoegd?</h3>
+            <div class="info-summary-grid">
+                <div class="info-summary-card"><strong>6</strong><span>opeenvolgende niveaus</span></div>
+                <div class="info-summary-card"><strong>18</strong><span>rekenonderdelen</span></div>
+                <div class="info-summary-card"><strong>500</strong><span>punten voor een beloning</span></div>
+                <div class="info-summary-card"><strong>Eigen profiel</strong><span>per leerling op dezelfde iPad</span></div>
+            </div>
+            <table class="info-table" style="margin-top:10px;">
+                <thead><tr><th>Onderdeel</th><th>Oefeningen en opbouw</th></tr></thead>
+                <tbody>
+                    <tr><td>Getallen & bewerkingen</td><td>Getalbegrip, tafels, optellen, aftrekken, vermenigvuldigen, delen, schatten en slim rekenen.</td></tr>
+                    <tr><td>Verhoudingen</td><td>Breuken, kommagetallen, procenten, verhoudingen en schaal vanaf het passende niveau.</td></tr>
+                    <tr><td>Meten & meetkunde</td><td>Tijd, geld, maten omrekenen, omtrek, oppervlakte en inhoud.</td></tr>
+                    <tr><td>Verbanden</td><td>Grafieken, tabellen, patronen, getallenlijnen en informatie aflezen.</td></tr>
+                    <tr><td>Toepassen</td><td>Eenvoudige en meerstaps redactiesommen met niveau-afhankelijke getallen en contexten.</td></tr>
+                </tbody>
+            </table>
+            <p class="info-note">Veel opgaven worden procedureel gegenereerd. Daardoor zijn er veel meer mogelijke combinaties dan er als vaste vragen in het bestand staan.</p>
+        </div>
+
+        <div class="info-section">
+            <h3>Leerdoelen per niveau</h3>
+            <div class="level-goals">
+                <div class="level-goal"><h4>Begin 4</h4><p>Getalbegrip tot 100, optellen en aftrekken, eerste tafels, hele en halve uren, eenvoudig geld en korte contextsommen.</p></div>
+                <div class="level-goal"><h4>Midden 4</h4><p>Groter getalbereik, tafels 2 t/m 15, kwartieren en vijfminutenstappen, delen door eerlijk verdelen en eenvoudige tabellen.</p></div>
+                <div class="level-goal"><h4>Begin 5</h4><p>Rekenen tot 10.000, grotere bewerkingen, delen en vermenigvuldigen, maten, geld, patronen en één- tot tweestapsproblemen.</p></div>
+                <div class="level-goal"><h4>Midden 5</h4><p>Vlotter hoofdrekenen, schriftelijke strategieën, klokkijken en tijdsduur, meetkundige begrippen en complexere contexten.</p></div>
+                <div class="level-goal"><h4>Groep 6</h4><p>Opbouw richting referentieniveau 1F met breuken, kommagetallen, basisprocenten, verhoudingen, meten en informatieverwerking.</p></div>
+                <div class="level-goal"><h4>Groep 7</h4><p>Verdieping van 1F en voorbereiding op 1S met meerstapsproblemen, schaal, procenten, formele bewerkingen en redeneren.</p></div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Aansluiting op Nederlandse kaders</h3>
+            <ul>
+                <li><strong>Cito Leerling in beeld:</strong> de app oefent binnen de vier rekendomeinen Getallen, Verhoudingen, Meten en meetkunde en Verbanden, met zowel kale als contextsommen.</li>
+                <li><strong>Geldende SLO-kerndoelen:</strong> de inhoud behandelt getallen en bewerkingen, schatten, meten, meetkunde, praktische problemen en het gebruiken van rekenstrategieën.</li>
+                <li><strong>Geactualiseerde kerndoelen:</strong> er is extra aandacht voor wiskundig redeneren, functioneel rekenen, strategiegebruik en informatie uit tabellen en grafieken.</li>
+                <li><strong>Referentieniveaus:</strong> groep 6 en 7 bouwen op naar 1F en bieden bij groep 7 onderdelen die voorbereiden op het streefniveau 1S.</li>
+            </ul>
+            <p class="info-note">De app is inhoudelijk afgestemd op openbare leerdoelen en domeinen. Zij is geen officieel Cito-product, geen vervanging voor onderwijs of toetsing en is niet door Cito of SLO gecertificeerd.</p>
+        </div>
+
+        <div class="info-section">
+            <h3>Voortgang, punten en privacy</h3>
+            <p>Iedere leerling op dezelfde iPad kan een eigen profiel gebruiken. Punten, voortgang en geschiedenis worden alleen lokaal in de browser van die iPad opgeslagen. Op een andere iPad ontstaat daarom een aparte voortgang; er vindt geen automatische synchronisatie plaats.</p>
+            <ul>
+                <li>De puntenreset wist alleen de punten en de voortgang naar de beloning.</li>
+                <li>De volledige scorereset wist statistieken, medailles en geschiedenis van de actieve leerling.</li>
+                <li>Bij 500 punten verschijnt de afgesproken beloningsmelding.</li>
+            </ul>
+        </div>
+
+        <button class="btn-action" type="button" data-action="terug-naar-home">← Terug naar het dashboard</button>
+    </section>
+
+    <!-- VIEW 2: HET DIGITALE WERKBLAD -->
+    <section id="view-werkblad" class="view" aria-label="Werkblad">
+        <h2 class="section-title">Mijn Oefenblad 📝</h2>
+        <p class="sub-text">Alle onderdelen staan netjes gesorteerd onder elkaar. Succes!</p>
+
+        <div id="worksheetContainer">
+            <!-- Gecategoriseerde sommen worden hier dynamisch ingeladen -->
+        </div>
+
+        <button class="btn-action" id="btnControleer" type="button" style="margin-top: 30px;" data-action="nakijken">Werkblad Controleren ✔️</button>
+        <button class="btn-action btn-alert" id="btnNaarScore" type="button" style="margin-top: 10px; display: none;" data-action="naar-evaluatie">Bekijk Mijn Score 📊</button>
+    </section>
+
+    <!-- VIEW 3: RESULTAAT EVALUATIE -->
+    <section id="view-evaluatie" class="view" aria-label="Resultaat">
+        <h2 class="section-title">Mooi werk! 🌟</h2>
+        <div class="eval-card">
+            <p class="eval-score" id="evalScore">0 / 0</p>
+            <p class="eval-feedback" id="evalFeedback">Goed gedaan!</p>
+            <p class="eval-points" id="evalPoints">+0 Punten toegevoegd!</p>
+            <button class="btn-action" type="button" data-action="terug-naar-home">Nieuw Oefenblad Maken 🏠</button>
+        </div>
+    </section>
+    </main>
+
+</div>
+
+
+<div class="reward-modal" id="rewardModal" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
+    <div class="reward-card">
+        <div class="reward-icon">🎉🏆</div>
+        <h2 id="rewardTitle">500 punten gehaald!</h2>
+        <p>Geweldig gewerkt! Je hebt de rekenbeloning verdiend. Tijd voor de beloning die jullie samen hebben afgesproken.</p>
+        <button class="btn-action" type="button" data-action="sluit-beloning">Super!</button>
+    </div>
+</div>
+
+<script>
+'use strict';
+
+/* ============================================================
+   CENTRALE INSTELLINGEN
+   ============================================================ */
+const CONFIG = {
+    storageKeys: {
+        points: 'rk_points_v6',
+        history: 'rk_history_v6',
+        progress: 'rk_progress_v6',
+        reward500: 'rk_reward500_v1'
+    },
+    historyLimit: 100,
+    duplicateRetryLimit: 25,
+    defaultTafels: [8, 9, 10, 12],
+    defaultSommenPerOefening: 10,
+    defaultGetalbereik: 1000,
+    defaultNiveau: 'groep6',
+    rewardThreshold: 500,
+    tafelFactoren: [3,4,5,6,7,8,9,11,12],
+    tafelBereik: { min: 1, max: 20 }
+};
+
+const LEVELS = {
+    begin4: { label:'Begin 4', uitleg:'Begin 4: rustig opbouwen met getallen tot 100, eenvoudige splitsingen, optellen en aftrekken, de eerste tafels, hele en halve uren en herkenbaar geld.', maxGetal:100, tafels:[2,3,4,5,10], factoren:[2,3,4,5,10], categories:['getalbegrip','tafels','optellen_aftrekken','klokkijken','geld','strategie','redactie'] },
+    midden4:{ label:'Midden 4', uitleg:'Midden 4: rekenen tot 1.000, tafels automatiseren tot en met 15, eenvoudige keer- en deelsommen, kloktijden, geld en informatie aflezen.', maxGetal:1000, tafels:[2,3,4,5,6,7,8,9,10,11,12,13,14,15], factoren:[2,3,4,5,6,7,8,9,10], categories:['getalbegrip','tafels','optellen_aftrekken','vermenigvuldigen','delen','klokkijken','geld','informatie','strategie','redactie'] },
+    begin5:{ label:'Begin 5', uitleg:'Begin 5: rekenen tot 10.000, grotere bewerkingen, delen, tijd, geld, maten, tabellen en handige rekenstrategieën.', maxGetal:10000, tafels:[2,3,4,5,6,7,8,9,10], factoren:[2,3,4,5,6,7,8,9,10], categories:['getalbegrip','tafels','optellen_aftrekken','vermenigvuldigen','delen','klokkijken','geld','meten','informatie','strategie','redactie'] },
+    midden5:{ label:'Midden 5', uitleg:'Midden 5: rekenen tot 100.000, tafels tot 15, meten, meetkunde, schatten, grafieken, patronen en slim rekenen.', maxGetal:100000, tafels:[2,3,4,5,6,7,8,9,10,11,12,13,14,15], factoren:[3,4,5,6,7,8,9,10,11,12], categories:['getalbegrip','tafels','optellen_aftrekken','vermenigvuldigen','delen','klokkijken','geld','meten','meetkunde','schatten','informatie','strategie','redactie'] },
+    groep6:{ label:'Groep 6', uitleg:'Groep 6: breuken, kommagetallen, basisprocenten, verhoudingen, meten, data lezen en rekenen tot 100.000.', maxGetal:100000, tafels:[2,3,4,5,6,7,8,9,10,11,12,13,14,15], factoren:[3,4,5,6,7,8,9,11,12], categories:['getalbegrip','tafels','optellen_aftrekken','vermenigvuldigen','delen','breuken','breukencontext','kommagetallen','procenten','verhoudingen','meten','meetkunde','schatten','informatie','strategie','redactie'] },
+    groep7:{ label:'Groep 7', uitleg:'Groep 7: grotere getallen, breuken, percentages, schaal, data, flexibel rekenen en meerstapsproblemen.', maxGetal:1000000, tafels:[2,3,4,5,6,7,8,9,10,11,12,13,14,15], factoren:[3,4,5,6,7,8,9,11,12], categories:['getalbegrip','tafels','optellen_aftrekken','vermenigvuldigen','delen','breuken','breukencontext','kommagetallen','procenten','verhoudingen','meten','meetkunde','schatten','informatie','strategie','redactie'] }
+};
+
+/* ============================================================
+   HULPFUNCTIES (klein en puur, makkelijk te testen)
+   ============================================================ */
+function randInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function pickRandom(arr) {
+    return arr[randInt(0, arr.length - 1)];
+}
+
+function gcd(a, b) {
+    while (b !== 0) {
+        [a, b] = [b, a % b];
+    }
+    return a;
+}
+
+function maakSom(vraag, antwoordNum, strategie = null, extra = {}) {
+    const antwoord = String(antwoordNum);
+    return Object.assign({
+        vraag,
+        antwoord,
+        strategie,
+        isSplitsen: false,
+        splitsData: null,
+        customHTML: '',
+        signature: `${vraag}=${antwoord}`
+    }, extra);
+}
+
+function maakSplitsSom(totaal, links, rechts, antwoordNum, strategie = 'getalbegrip') {
+    const antwoord = String(antwoordNum);
+    return {
+        vraag: 'Vul het missende getal in het splitsingsschema in:',
+        antwoord,
+        strategie,
+        isSplitsen: true,
+        splitsData: { totaal, links, rechts },
+        signature: `splits:${totaal}-${links}-${rechts}`
+    };
+}
+
+/* ============================================================
+   SOM-GENERATOREN PER CATEGORIE
+   Elke generator is een pure functie zonder bijwerkingen buiten
+   het lezen van de (injecteerbare) instellingen.
+   ============================================================ */
+
+function genTafels(instellingen) {
+    const profiel = LEVELS[instellingen.niveau] || LEVELS.groep6;
+    const tafels = (instellingen.selectedTafels && instellingen.selectedTafels.length)
+        ? instellingen.selectedTafels.filter(t => profiel.tafels.includes(t) && t !== 1)
+        : profiel.tafels.filter(t => t !== 1);
+    const bruikbareTafels = tafels.length ? tafels : profiel.tafels.filter(t => t !== 1);
+    const t = pickRandom(bruikbareTafels);
+    const factoren = profiel.factoren.filter(f => f !== 1);
+    const m = pickRandom(factoren);
+    const klein = Math.min(m, t), groot = Math.max(m, t);
+    return maakSom(`${m} × ${t} =`, m * t, 'tafels', { signature: `mul:${klein}x${groot}` });
+}
+
+function genSchattenOptellen() {
+    const g1 = randInt(201, 600);
+    const g2 = randInt(101, 400);
+    const antwoord = Math.round(g1 / 100) * 100 + Math.round(g2 / 100) * 100;
+    return maakSom(`Hoeveel is het ongeveer? (Rond af op honderdtallen):\n ${g1} + ${g2} ≈`, antwoord);
+}
+
+function genSchattenAftrekken() {
+    const g1 = randInt(400, 1199);
+    const g2 = randInt(101, 400);
+    const antwoord = Math.round(g1 / 100) * 100 - Math.round(g2 / 100) * 100;
+    return maakSom(`Hoeveel is het ongeveer? (Rond af op honderdtallen):\n ${g1} - ${g2} ≈`, antwoord);
+}
+
+function genSchattenVermenigvuldigen() {
+    const g1 = pickRandom([29, 39, 49, 99]);
+    const g2 = randInt(3, 9);
+    const antwoord = Math.round(g1 / 10) * 10 * g2;
+    return maakSom(`Hoeveel is het ongeveer? (Rond af op tientallen):\n ${g1} × ${g2} ≈`, antwoord);
+}
+
+function genSchatten() {
+    const varianten = [genSchattenOptellen, genSchattenAftrekken, genSchattenVermenigvuldigen];
+    return pickRandom(varianten)();
+}
+
+function genSplitsen(instellingen) {
+    const niveau = instellingen.niveau || CONFIG.defaultNiveau;
+    if (niveau === 'begin4' || niveau === 'midden4') {
+        const max = niveau === 'begin4' ? 30 : 100;
+        const totaal = randInt(10, max);
+        const links = randInt(2, totaal - 2);
+        const rechts = totaal - links;
+        const linksOnbekend = Math.random() > 0.5;
+        return maakSplitsSom(totaal, linksOnbekend ? '?' : links, linksOnbekend ? rechts : '?', linksOnbekend ? links : rechts, 'getalbegrip');
+    }
+    const max = LEVELS[niveau]?.maxGetal || 100000;
+    const variant = randInt(0, 2);
+    if (variant === 0) {
+        const n = randInt(1000, max);
+        const duizendtallen = Math.floor(n / 1000) * 1000;
+        const rest = n - duizendtallen;
+        return maakSom(`${n} = ${duizendtallen} + ...`, rest, 'getalbegrip');
+    }
+    if (variant === 1) {
+        const tientallen = randInt(12, 98);
+        const factor = pickRandom([3,4,5,6,7,8,9]);
+        const tientalDeel = Math.floor(tientallen / 10) * 10;
+        return maakSom(`${tientallen} × ${factor} = ${tientalDeel} × ${factor} + ...`, (tientallen - tientalDeel) * factor, 'getalbegrip');
+    }
+    const deler = pickRandom([3,4,5,6,8,9]);
+    const honderdtal = randInt(2, 9) * 100;
+    const rest = deler * randInt(2, 15);
+    return maakSom(`${honderdtal + rest} : ${deler} = ${honderdtal} : ${deler} + ...`, rest / deler, 'getalbegrip');
+}
+
+const POOL_BREUKEN_HELFT_VAN = [12, 16, 20, 24, 32, 36, 40, 44, 48];
+const POOL_BREUKEN_TELLER = [6, 8, 10, 12, 14, 16, 18, 20];
+
+function genBreuken() {
+    const subB = randInt(0, 3);
+    if (subB === 0) {
+        const nr = pickRandom(POOL_BREUKEN_HELFT_VAN);
+        return maakSom(`Wat is 3/4 van ${nr}?`, (nr / 4) * 3);
+    }
+    if (subB === 1) {
+        const nrs = pickRandom(POOL_BREUKEN_TELLER);
+        return maakSom(`Vul de ontbrekende teller in:\n1/2 = .../${nrs}`, nrs / 2);
+    }
+    if (subB === 2) {
+        // Procedureel gegenereerd (in plaats van een vaste lijst), zodat er
+        // duizenden verschillende vereenvoudig-opgaven mogelijk zijn.
+        // Belangrijk: teller/noemer moet écht al volledig vereenvoudigd zijn
+        // (gcd = 1), anders klopt "zo ver mogelijk" niet met de gevraagde noemer.
+        let noemerVereenvoudigd, tellerVereenvoudigd;
+        do {
+            noemerVereenvoudigd = randInt(2, 9);
+            tellerVereenvoudigd = randInt(1, noemerVereenvoudigd - 1);
+        } while (gcd(tellerVereenvoudigd, noemerVereenvoudigd) !== 1);
+        const factor = randInt(2, 9);
+        const teller = tellerVereenvoudigd * factor;
+        const noemer = noemerVereenvoudigd * factor;
+        return maakSom(`Vereenvoudig de breuk zo ver mogelijk:\n${teller}/${noemer} = ... / ${noemerVereenvoudigd}`, tellerVereenvoudigd);
+    }
+    // "Haal de helen eruit": ook procedureel, ruime variatie.
+    const noemer = randInt(2, 9);
+    const helen = randInt(1, 5);
+    const rest = randInt(1, noemer - 1);
+    const teller = helen * noemer + rest;
+    const antwoord = `${helen} ${rest}/${noemer}`;
+    return maakSom(`Haal de helen eruit:\n${teller}/${noemer} = ... (Geef op als bijv: 1 3/4)`, antwoord);
+}
+
+const POOL_BREUKEN_CONTEXT = [
+    { n: 1, v: 'Van een hardlooproute van [X] km heeft Tess 1/[Y] deel afgelegd. Hoeveel km heeft ze gerend?', f: (x, y) => x / y },
+    { n: 2, v: 'In een klas zitten [X] kinderen. 2/[Y] deel zit op voetbal. Hoeveel kinderen zijn dat?', f: (x, y) => (x / y) * 2 },
+    { n: 3, v: 'Een benzinetank heeft een inhoud van [X] liter. De tank is voor 3/[Y] gevuld. Hoeveel liter zit erin?', f: (x, y) => (x / y) * 3 },
+    { n: 1, v: 'Daan krijgt [X] euro zakgeld per maand. Hij spaart 1/[Y] deel hiervan. Hoeveel euro spaart hij?', f: (x, y) => x / y },
+    { n: 3, v: 'Een cake moet [X] minuten in de oven. Hij staat er nu 3/[Y] van de tijd in. Hoeveel minuten staat hij al in de oven?', f: (x, y) => (x / y) * 3 },
+    { n: 1, v: 'Er liggen [X] koekjes in een trommel. Siem eet 1/[Y] deel op. Hoeveel koekjes eet Siem?', f: (x, y) => x / y },
+    { n: 4, v: 'Een film duurt [X] minuten. Merel heeft al 4/[Y] deel gekeken. Hoeveel minuten heeft ze gezien?', f: (x, y) => (x / y) * 4 },
+    { n: 1, v: 'Een boer heeft [X] koeien. 1/[Y] deel staat in de stal, de rest staat in de wei. Hoeveel koeien staan er in de stal?', f: (x, y) => x / y },
+    { n: 1, v: 'De afstand naar opa en oma is [X] km. Na 1/[Y] deel van de rit stoppen we voor limonade. Na hoeveel km stoppen we?', f: (x, y) => x / y },
+    { n: 2, v: 'Een chocoladereep bestaat uit [X] blokjes. Bram eet 2/[Y] deel op. Hoeveel blokjes eet Bram?', f: (x, y) => (x / y) * 2 },
+    { n: 3, v: 'Voor een pizza is [X] gram kaas nodig. Sarah heeft al 3/[Y] deel geraspt. Hoeveel gram kaas is dat?', f: (x, y) => (x / y) * 3 },
+    { n: 1, v: "Op een parkeerplaats staan [X] auto's. 1/[Y] deel is elektrisch. Hoeveel elektrische auto's staan er?", f: (x, y) => x / y },
+    { n: 1, v: 'Een basisschool heeft [X] leerlingen. 1/[Y] deel komt met de step. Hoeveel leerlingen stappen op de step?', f: (x, y) => x / y },
+    { n: 5, v: 'In een boomgaard hangen [X] appels. 5/[Y] deel is al rijp om te plukken. Hoeveel appels zijn er rijp?', f: (x, y) => (x / y) * 5 },
+    { n: 1, v: 'Een zwembad is gevuld met [X] liter water. Door de zon verdampt 1/[Y] deel. Hoeveel liter water is er verdampt?', f: (x, y) => x / y },
+    { n: 1, v: 'Een boek telt [X] bladzijden. Lucas heeft 1/[Y] deel uit. Hoeveel bladzijden heeft Lucas gelezen?', f: (x, y) => x / y },
+    { n: 3, v: 'Er zitten [X] kralen in een zakje. Fleur gebruikt 3/[Y] deel voor een armband. Hoeveel kralen gebruikt Fleur?', f: (x, y) => (x / y) * 3 },
+    { n: 4, v: 'Een fietstocht is [X] km lang. De wielrenners hebben er al 4/[Y] deel op zitten. Hoeveel km hebben ze gefietst?', f: (x, y) => (x / y) * 4 },
+    { n: 1, v: 'In een mand liggen [X] peren. 1/[Y] deel is beurs en moet weg. Hoeveel peren gooi je weg?', f: (x, y) => x / y },
+    { n: 2, v: 'Lars heeft [X] knikkers gewonnen. Hij geeft 2/[Y] deel weg aan zijn broertje. Hoeveel knikkers geeft hij weg?', f: (x, y) => (x / y) * 2 },
+    { n: 1, v: 'Een computergame kost [X] euro. Luuk krijgt 1/[Y] deel korting. Hoeveel euro korting krijgt Luuk?', f: (x, y) => x / y },
+    { n: 3, v: 'Op een hondenshow zijn [X] honden aanwezig. 3/[Y] deel bestaat uit poedels. Hoeveel poedels doen er mee?', f: (x, y) => (x / y) * 3 },
+    { n: 1, v: 'Een schooltuin is [X] vierkante meter groot. 1/[Y] deel is gereserveerd voor bloemen. Hoeveel vierkante meter bloemen is dat?', f: (x, y) => x / y },
+    { n: 1, v: 'Voor een groot feest zijn [X] ballonnen opgeblazen. 1/[Y] deel knapt helaas voortijdig. Hoeveel ballonnen knappen er?', f: (x, y) => x / y }
+];
+
+function genBreukenContext() {
+    const item = pickRandom(POOL_BREUKEN_CONTEXT);
+    // y moet groter zijn dan de teller uit het sjabloon, anders ontstaat er
+    // een onechte breuk (bijv. "5/2 deel"), wat pedagogisch onzin is.
+    const yOpties = [2, 3, 4, 5, 6, 7, 8, 9, 10, 12].filter(y => y > item.n);
+    const y = pickRandom(yOpties);
+    const factor = randInt(3, 14);
+    const x = y * factor;
+    const vraag = item.v.replace('[X]', x).replace('[Y]', y);
+    return maakSom(vraag, item.f(x, y));
+}
+
+function genOptellenAftrekken(instellingen) {
+    const niveau = instellingen.niveau || CONFIG.defaultNiveau;
+    const max = LEVELS[niveau]?.maxGetal || instellingen.getalbereik || 1000;
+    const min = niveau === 'begin4' ? 5 : niveau === 'midden4' ? 20 : 100;
+    const a = randInt(min, Math.max(min + 5, Math.floor(max * 0.7)));
+    const b = randInt(2, Math.max(3, Math.min(a, Math.floor(max * 0.3))));
+    if (Math.random() > 0.5) return maakSom(`${a} + ${b} =`, a + b, 'optellen_aftrekken');
+    return maakSom(`${a + b} - ${b} =`, a, 'optellen_aftrekken');
+}
+
+function genVermenigvuldigen(instellingen) {
+    const niveau = instellingen.niveau || CONFIG.defaultNiveau;
+    let a, b;
+    if (niveau === 'midden4') { a=randInt(2,15); b=randInt(2,10); }
+    else if (niveau === 'begin5') { a=randInt(11,49); b=randInt(2,9); }
+    else if (niveau === 'midden5') { a=randInt(12,99); b=randInt(2,12); }
+    else {
+        const variant = randInt(0, niveau === 'groep6' ? 2 : 3);
+        if (variant === 0) { a=randInt(11,99); b=randInt(3,12); }
+        else if (variant === 1) { a=pickRandom([14,25,35,45,60,75,125,205,230,320]); b=randInt(3,12); }
+        else if (variant === 2) { a=randInt(101,999); b=randInt(3,9); }
+        else { a=randInt(12,49); b=randInt(11,29); }
+    }
+    const klein=Math.min(a,b), groot=Math.max(a,b);
+    return maakSom(`${a} × ${b} =`, a*b, 'vermenigvuldigen', {signature:`mul:${klein}x${groot}`});
+}
+
+function genDelen(instellingen) {
+    const niveau = instellingen.niveau || CONFIG.defaultNiveau;
+    let deler, quotient, rest=0;
+    if (niveau === 'midden4') { deler=randInt(2,10); quotient=randInt(2,10); }
+    else if (niveau === 'begin5') { deler=randInt(2,10); quotient=randInt(5,25); }
+    else if (niveau === 'midden5') { deler=randInt(2,12); quotient=randInt(6,45); }
+    else {
+        const variant=randInt(0,niveau==='groep6'?2:3);
+        if(variant===0){deler=randInt(3,12); quotient=randInt(8,80);}
+        else if(variant===1){deler=pickRandom([20,25,30,40,50]); quotient=randInt(3,40);}
+        else if(variant===2){deler=pickRandom([3,4,5,6,8,9]); quotient=randInt(20,180);}
+        else {deler=randInt(4,15); quotient=randInt(8,40); rest=randInt(1,deler-1);}
+    }
+    const deeltal=deler*quotient+rest;
+    if(rest) return maakSom(`${deeltal} : ${deler} = ... rest ...`, `${quotient} rest ${rest}`, 'delen', {signature:`div:${deeltal}:${deler}`});
+    return maakSom(`${deeltal} : ${deler} =`, quotient, 'delen', {signature:`div:${deeltal}:${deler}`});
+}
+
+/* REDACTIE_DATASET
+   Elke opgave is een los dataset-item met een tekstsjabloon (v),
+   antwoordfunctie (f) en passende getallengenerator (genXY). Nieuwe
+   redactiesommen kunnen hierdoor worden toegevoegd zonder de app-logica
+   te wijzigen. */
+const REDACTIE_DATASET = [
+    { v: 'Een dierentuin verkoopt [X] familietickets in de ochtend en [Y] in de middag. Hoeveel familietickets zijn er in totaal verkocht?', f: (x, y) => x + y, genXY: () => [randInt(150, 449), randInt(50, 249)] },
+    { v: 'Een bakker maakt [X] croissantjes. Aan het einde van de dag heeft hij er nog [Y] over. Hoeveel croissantjes zijn er verkocht?', f: (x, y) => x - y, genXY: () => [randInt(400, 899), randInt(50, 349)] },
+    { v: 'Voor een barbecuefeest koopt de slager [X] luxe barbecuepakketten. In elk pakket zitten [Y] stuks vlees. Hoeveel stuks vlees zijn dit in totaal?', f: (x, y) => x * y, genXY: () => [randInt(8, 22), pickRandom([5, 6, 8, 10, 12])] },
+    { v: 'Een basisschool verdeelt [X] potloden eerlijk over [Y] klassen. Hoeveel potloden krijgt elke klas?', f: (x, y) => x / y, genXY: () => { const y = randInt(4, 9); return [y * randInt(8, 19), y]; } },
+    { v: 'Mila spaart voor een nieuwe fiets van [X] euro. Ze heeft al [Y] euro in haar spaarpot zitten. Hoeveel euro moet ze nog sparen?', f: (x, y) => x - y, genXY: () => [randInt(400, 899), randInt(50, 349)] },
+    { v: 'Er staan [X] rijen met stoelen in de aula van de school. In elke rij staan precies [Y] stoelen. Hoeveel stoelen staan er in totaal?', f: (x, y) => x * y, genXY: () => [randInt(8, 22), pickRandom([5, 6, 8, 10, 12])] },
+    { v: 'Een vrachtwagen vervoert [X] kratten appels. Bij de eerste winkel lost hij [Y] kratten. Hoeveel kratten met appels blijven er over?', f: (x, y) => x - y, genXY: () => [randInt(400, 899), randInt(50, 349)] },
+    { v: 'Een bibliotheek krijgt een levering van [X] nieuwe boeken. Ze verdelen de boeken gelijkmatig over [Y] planken. Hoeveel boeken komen er op elke plank?', f: (x, y) => x / y, genXY: () => { const y = randInt(4, 9); return [y * randInt(8, 19), y]; } },
+    { v: 'Sem fietst elke dag [X] km naar school en [X] km terug naar huis. Hoeveel km fietst Sem in [Y] schooldagen in totaal?', f: (x, y) => (x * 2) * y, genXY: () => [randInt(2, 5), randInt(4, 5)] },
+    { v: 'In een bioscoopzaal zitten [X] mensen te kijken naar een spannende film. [Y] mensen verlaten de zaal tijdens de pauze. Hoeveel mensen blijven er over?', f: (x, y) => x - y, genXY: () => [randInt(400, 899), randInt(50, 349)] },
+    { v: 'Een supermarkt vult de schappen aan met [X] dozen frisdrank. In iedere doos zitten [Y] flessen. Hoeveel flessen frisdrank zijn dit in totaal?', f: (x, y) => x * y, genXY: () => [randInt(8, 22), pickRandom([5, 6, 8, 10, 12])] },
+    { v: 'Een groep van [X] vrienden gaat naar een pretpark. Ze betalen in totaal [Y] euro voor de entreekaartjes. Hoeveel kost één entreekaartje?', f: (x, y) => y / x, genXY: () => { const x = randInt(4, 7); const prijs = randInt(12, 16); return [x, x * prijs]; } },
+    { v: 'Sophie koopt op de markt [X] gram aardbeien en [Y] gram blauwe bessen. Hoeveel gram fruit heeft Sophie in totaal gekocht?', f: (x, y) => x + y, genXY: () => [randInt(150, 449), randInt(50, 249)] },
+    { v: 'Een marathonloper heeft al [X] meter afgelegd. De totale marathon is [Y] meter lang. Hoeveel meter moet de loper nog rennen?', f: (x, y) => y - x, genXY: () => [randInt(5000, 35000), 42195] },
+    { v: 'Een bloemist maakt boeketten. Ze gebruikt [X] rozen per boeket. Hoeveel rozen heeft ze nodig om [Y] boeketten te maken?', f: (x, y) => x * y, genXY: () => [randInt(8, 22), pickRandom([5, 6, 8, 10, 12])] },
+    { v: 'Er moeten [X] tennisballen verpakt worden in kokers. In elke koker passen [Y] tennisballen. Hoeveel kokers zijn er nodig?', f: (x, y) => x / y, genXY: () => { const y = randInt(4, 9); return [y * randInt(8, 19), y]; } },
+    { v: 'Daan verdient [X] euro per uur met zijn bijbaantje. Vorige week heeft hij [Y] uur gewerkt. Hoeveel euro heeft hij in totaal verdiend?', f: (x, y) => x * y, genXY: () => [12, randInt(4, 9)] },
+    { v: 'Een grote doos met legoblokjes weegt [X] gram. De lege plastic doos zelf weegt [Y] gram. Hoeveel gram wegen alle legoblokjes samen?', f: (x, y) => x - y, genXY: () => [randInt(400, 899), randInt(50, 349)] },
+    { v: 'Voor een knutselproject heeft de juf [X] rollen touw gekocht. Elke rol is precies [Y] meter lang. Hoeveel meter touw is er in totaal?', f: (x, y) => x * y, genXY: () => [randInt(8, 22), pickRandom([5, 6, 8, 10, 12])] },
+    { v: 'Een schoolbus start de rit met [X] kinderen. Bij de eerste halte stappen er [Y] kinderen uit, en komen er 5 bij. Hoeveel kinderen zitten er nu in de bus?', f: (x, y) => (x - y) + 5, genXY: () => { const y = randInt(5, 12); return [randInt(y + 5, y + 20), y]; } },
+    { v: 'Emma bezorgt [X] folders per week. Hoeveel folders bezorgt zij in totaal in [Y] weken?', f: (x, y) => x * y, genXY: () => [randInt(8, 22), pickRandom([5, 6, 8, 10, 12])] },
+    { v: 'Een fabriek verpakt [X] kilo suiker in zakken van [Y] kilo per stuk. Hoeveel suikerzakken worden er gevuld?', f: (x, y) => x / y, genXY: () => { const y = randInt(4, 9); return [y * randInt(8, 19), y]; } },
+    { v: 'Op een verjaardagsfeestje krijgt Quinn [X] euro van zijn opa en [Y] euro van zijn tante. Hoeveel euro heeft hij in totaal gekregen?', f: (x, y) => x + y, genXY: () => [randInt(150, 449), randInt(50, 249)] },
+    { v: 'Een voetbalstadion biedt plaats aan [X] toeschouwers. Tijdens een wedstrijd zijn er [Y] stoeltjes leeg. Hoeveel toeschouwers zijn er aanwezig?', f: (x, y) => x - y, genXY: () => [randInt(4000, 12000), randInt(200, 1800)] },
+    { v: 'Een school koopt [X] dozen met [Y] schriften. Er worden 167 schriften uitgedeeld. Hoeveel schriften blijven over?', f: (x, y) => x * y - 167, genXY: () => [randInt(12, 24), pickRandom([18,20,24,25,30])] },
+    { v: 'Een bus heeft [X] zitplaatsen. Er rijden [Y] bussen. In totaal gaan er 17 begeleiders mee. Hoeveel plaatsen blijven over als er 215 leerlingen meegaan?', f: (x, y) => x * y - 232, genXY: () => [pickRandom([45,50,55,60]), randInt(5,8)] },
+    { v: 'Een winkel verkoopt [X] spellen van [Y] euro. De winkel geeft daarna 125 euro uit aan nieuwe posters. Hoeveel euro blijft van de opbrengst over?', f: (x, y) => x * y - 125, genXY: () => [randInt(12,35), pickRandom([15,20,25,30,40])] },
+    { v: 'Voor een sportdag zijn [X] flesjes water nodig. In één doos zitten [Y] flesjes. Hoeveel hele dozen moeten minimaal worden besteld?', f: (x, y) => Math.ceil(x / y), genXY: () => [randInt(180,450), pickRandom([12,18,24])] }
+];
+
+const REDACTIE_LAAG = [
+    { v:'In een mand liggen [X] appels. Er komen [Y] appels bij. Hoeveel appels liggen er nu?', f:(x,y)=>x+y, gen:(niv)=>[randInt(12,niv==='begin4'?45:120),randInt(3,niv==='begin4'?20:60)] },
+    { v:'Een bakker heeft [X] broodjes. Hij verkoopt er [Y]. Hoeveel broodjes blijven over?', f:(x,y)=>x-y, gen:(niv)=>{const y=randInt(4,niv==='begin4'?18:50);return [randInt(y+8,y+(niv==='begin4'?40:120)),y];} },
+    { v:'Er staan [X] tafels met [Y] stoelen per tafel. Hoeveel stoelen zijn dat samen?', f:(x,y)=>x*y, gen:(niv)=>[randInt(2,niv==='begin4'?6:12),randInt(2,niv==='begin4'?5:10)] },
+    { v:'[X] potloden worden eerlijk verdeeld over [Y] kinderen. Hoeveel potloden krijgt ieder kind?', f:(x,y)=>x/y, gen:(niv)=>{const y=randInt(2,niv==='begin4'?5:10);return [y*randInt(2,niv==='begin4'?8:15),y];} },
+    { v:'Sara heeft [X] euro. Ze koopt iets van [Y] euro. Hoeveel euro houdt ze over?', f:(x,y)=>x-y, gen:(niv)=>{const y=randInt(2,niv==='begin4'?15:40);return [randInt(y+5,y+(niv==='begin4'?35:80)),y];} },
+    { v:'Een bus heeft eerst [X] kinderen. Er stappen [Y] kinderen bij. Hoeveel kinderen zitten er daarna in de bus?', f:(x,y)=>x+y, gen:(niv)=>[randInt(10,niv==='begin4'?35:80),randInt(2,niv==='begin4'?15:35)] },
+    { v:'Een boek heeft [X] bladzijden. Noor heeft er [Y] gelezen. Hoeveel bladzijden moet ze nog?', f:(x,y)=>x-y, gen:(niv)=>{const y=randInt(5,niv==='begin4'?25:70);return [randInt(y+10,y+(niv==='begin4'?50:150)),y];} },
+    { v:'Een klas heeft [X] rijen met [Y] leerlingen. Hoeveel leerlingen zijn dat?', f:(x,y)=>x*y, gen:(niv)=>[randInt(2,niv==='begin4'?5:8),randInt(2,niv==='begin4'?6:12)] },
+    { v:'Een fietser rijdt [X] kilometer in de ochtend en [Y] kilometer in de middag. Hoeveel kilometer rijdt hij totaal?', f:(x,y)=>x+y, gen:(niv)=>[randInt(3,niv==='begin4'?15:40),randInt(3,niv==='begin4'?15:40)] },
+    { v:'Een doos bevat [X] koekjes. Ze worden verdeeld over [Y] bordjes. Hoeveel koekjes komen op elk bordje?', f:(x,y)=>x/y, gen:(niv)=>{const y=randInt(2,niv==='begin4'?5:8);return [y*randInt(3,niv==='begin4'?8:15),y];} }
+];
+
+function genRedactie(instellingen) {
+    const niveau = instellingen?.niveau || CONFIG.defaultNiveau;
+    if (['begin4','midden4','begin5','midden5'].includes(niveau)) {
+        const item = pickRandom(REDACTIE_LAAG);
+        const [x,y] = item.gen(niveau);
+        return maakSom(item.v.replace('[X]',x).replace('[Y]',y), item.f(x,y), 'redactie');
+    }
+    if (randInt(1, 100) <= 45) {
+        const dozen = randInt(3, 12), perDoos = randInt(6, 24), verkocht = randInt(5, Math.max(6, dozen * perDoos - 10));
+        const templates = [
+            {vraag:`Een winkel ontvangt ${dozen} dozen met elk ${perDoos} flesjes. Die dag worden ${verkocht} flesjes verkocht. Hoeveel flesjes zijn er nog?`, antwoord:dozen*perDoos-verkocht},
+            {vraag:`Een school koopt ${dozen} pakken met elk ${perDoos} schriften. De schriften worden gelijk verdeeld over ${dozen} groepen. Hoeveel schriften krijgt elke groep?`, antwoord:perDoos},
+            {vraag:`Een bus rijdt 's ochtends ${dozen*perDoos} km en 's middags ${verkocht} km minder. Hoeveel kilometer rijdt de bus die dag in totaal?`, antwoord:dozen*perDoos+(dozen*perDoos-verkocht)}
+        ];
+        const gekozen=pickRandom(templates);
+        return maakSom(gekozen.vraag, gekozen.antwoord, 'redactie');
+    }
+    const item = pickRandom(REDACTIE_DATASET);
+    const [x, y] = item.genXY();
+    const vraag = item.v.replace('[X]', x).replace('[Y]', y);
+    return maakSom(vraag, item.f(x, y), 'redactie');
+}
+
+function genKommagetallen(instellingen) {
+    const niveau = instellingen.niveau || CONFIG.defaultNiveau;
+    const variant = randInt(0, 3);
+    const a = randInt(10, 999) / 10;
+    const b = randInt(10, 499) / 10;
+    if (variant === 0) return maakSom(`${a.toFixed(1)} + ${b.toFixed(1)} =`, (a+b).toFixed(1));
+    if (variant === 1) {
+        const groot = Math.max(a,b), klein = Math.min(a,b);
+        return maakSom(`${groot.toFixed(1)} - ${klein.toFixed(1)} =`, (groot-klein).toFixed(1));
+    }
+    if (variant === 2) {
+        const n = randInt(12, 999) / 10;
+        const f = pickRandom([3,4,5,6,8]);
+        return maakSom(`${n.toFixed(1)} × ${f} =`, (n*f).toFixed(1));
+    }
+    const f = pickRandom([2,4,5,8,10]);
+    const q = randInt(3, niveau === 'groep6' ? 30 : 80) / 10;
+    return maakSom(`${(q*f).toFixed(1)} : ${f} =`, q.toFixed(1));
+}
+
+function genProcenten(instellingen) {
+    const niveau = instellingen.niveau || CONFIG.defaultNiveau;
+    const percentages = niveau === 'groep6' ? [10,25,50,75] : [1,5,10,20,25,50,75];
+    const p = pickRandom(percentages);
+    const basis = pickRandom([40,60,80,100,120,160,200,240,300,400,500]);
+    if (randInt(0,1) === 0) return maakSom(`${p}% van ${basis} =`, basis*p/100);
+    const deel = basis*p/100;
+    return maakSom(`${deel} is hoeveel procent van ${basis}?`, p);
+}
+
+function genVerhoudingen(instellingen) {
+    const niveau = instellingen.niveau || CONFIG.defaultNiveau;
+    const variant = randInt(0, 5);
+    const factor = randInt(2, niveau === 'groep6' ? 6 : 12);
+    if (variant === 0) {
+        const personen = randInt(2, 8), perGroep = randInt(2, 9);
+        return maakSom(`Voor ${personen} personen zijn ${personen * perGroep} broodjes nodig. Hoeveel broodjes zijn nodig voor ${personen * factor} personen?`, personen * perGroep * factor);
+    }
+    if (variant === 1) {
+        const cm = randInt(2, 12), kmPerCm = randInt(2, 10);
+        return maakSom(`Op een kaart is 1 cm gelijk aan ${kmPerCm} km. Twee plaatsen liggen ${cm} cm uit elkaar. Hoeveel km is dat in werkelijkheid?`, cm * kmPerCm);
+    }
+    if (variant === 2) {
+        const pakken = randInt(2, 8), stuks = randInt(4, 12), doel = pakken * factor;
+        return maakSom(`${pakken} pakken bevatten samen ${pakken * stuks} flesjes. Hoeveel flesjes zitten in ${doel} pakken?`, doel * stuks);
+    }
+    if (variant === 3) {
+        const schaal = pickRandom([20, 25, 50, 100, 200]);
+        const lengte = randInt(3, 15);
+        return maakSom(`Een model is gemaakt op schaal 1 : ${schaal}. Op het model is een lengte ${lengte} cm. Hoeveel cm is dat in werkelijkheid?`, schaal * lengte);
+    }
+    if (variant === 4) {
+        const basis = randInt(2, 7), prijsPer = randInt(3, 12), nieuwAantal = basis * factor;
+        return maakSom(`${basis} kaartjes kosten samen €${basis * prijsPer}. Hoeveel euro kosten ${nieuwAantal} kaartjes?`, nieuwAantal * prijsPer);
+    }
+    const delenSap = randInt(1, 3), delenWater = randInt(3, 8), glazen = randInt(2, 6);
+    return maakSom(`Voor limonade gebruik je ${delenSap} deel siroop en ${delenWater} delen water. Hoeveel delen water heb je nodig bij ${delenSap * glazen} delen siroop?`, delenWater * glazen);
+}
+
+function genMeten(instellingen) {
+    const variant = randInt(0,4);
+    if (variant===0) { const m=randInt(3,40); return maakSom(`${m} meter = ... centimeter`, m*100); }
+    if (variant===1) { const kg=randInt(2,25); return maakSom(`${kg} kilogram = ... gram`, kg*1000); }
+    if (variant===2) { const l=randInt(2,20); return maakSom(`${l} liter = ... milliliter`, l*1000); }
+    if (variant===3) { const min=randInt(2,8)*15; return maakSom(`${min} minuten = ... uur`, String(min/60)); }
+    const euro=randInt(5,80); const cent=pickRandom([5,10,20,25,50,75]);
+    return maakSom(`€${euro},${String(cent).padStart(2,'0')} = ... cent`, euro*100+cent);
+}
+
+function genMeetkunde(instellingen) {
+    const variant = randInt(0, 7);
+    const l = randInt(4, 28), b = randInt(3, 20), h = randInt(2, 12);
+    if (variant === 0) return maakSom(`Een rechthoekig schoolplein is ${l} m lang en ${b} m breed. Wat is de omtrek in meter?`, 2 * (l + b));
+    if (variant === 1) return maakSom(`Een tuin is ${l} m lang en ${b} m breed. Wat is de oppervlakte in m²?`, l * b);
+    if (variant === 2) return maakSom(`Een doos is ${l} cm lang, ${b} cm breed en ${h} cm hoog. Wat is de inhoud in cm³?`, l * b * h);
+    if (variant === 3) {
+        const zijde = randInt(4, 20);
+        return maakSom(`Een vierkant heeft zijden van ${zijde} cm. Wat is de omtrek in cm?`, 4 * zijde);
+    }
+    if (variant === 4) {
+        const zijde = randInt(4, 24);
+        return maakSom(`Een vierkante tegel heeft zijden van ${zijde} cm. Wat is de oppervlakte in cm²?`, zijde * zijde);
+    }
+    if (variant === 5) {
+        const omtrek = 2 * (l + b);
+        return maakSom(`Een rechthoek heeft een omtrek van ${omtrek} cm en is ${l} cm lang. Hoe breed is de rechthoek?`, b);
+    }
+    if (variant === 6) {
+        const opp = l * b;
+        return maakSom(`Een rechthoek heeft een oppervlakte van ${opp} cm² en is ${l} cm lang. Hoe breed is de rechthoek?`, b);
+    }
+    const inhoud = l * b * h;
+    return maakSom(`Een balk heeft een inhoud van ${inhoud} cm³. De lengte is ${l} cm en de breedte ${b} cm. Hoe hoog is de balk?`, h);
+}
+
+
+function maakKlokHTML(uur, minuut) {
+    const uurHoek = (uur % 12) * 30 + minuut * 0.5;
+    const minHoek = minuut * 6;
+    const nummers = [[12,50,9],[3,91,50],[6,50,91],[9,9,50]].map(([n,x,y]) => `<span class="clock-number" style="left:${x}%;top:${y}%">${n}</span>`).join('');
+    let streepjes='';
+    for(let i=0;i<60;i++) streepjes += `<span class="clock-tick ${i%5===0?'major':''}" style="transform:translateX(-50%) rotate(${i*6}deg)"></span>`;
+    return `<div class="visual-clock">${streepjes}${nummers}<span class="clock-hand minute" style="transform:translateX(-50%) rotate(${minHoek}deg)"></span><span class="clock-hand hour" style="transform:translateX(-50%) rotate(${uurHoek}deg)"></span></div>`;
+}
+
+function genKlokkijken(instellingen) {
+    const niveau = instellingen.niveau;
+    let minuten = [0,30];
+    if (niveau === 'midden4') minuten = [0,5,10,15,20,25,30,35,40,45,50,55];
+    if (['begin5','midden5'].includes(niveau)) minuten = [0,5,10,15,20,25,30,35,40,45,50,55];
+    const uur = randInt(1,12), minuut = pickRandom(minuten);
+    const antwoord = `${String(uur).padStart(2,'0')}:${String(minuut).padStart(2,'0')}`;
+    return maakSom('Hoe laat is het op de klok? Typ bijvoorbeeld 08:30.', antwoord, 'klokkijken', { customHTML: maakKlokHTML(uur,minuut) });
+}
+
+function geldHTML(items) {
+    return `<div class="money-visual">${items.map(v => {
+        const waarde=Number(v);
+        let klasse='money-chip';
+        if(waarde<1) klasse+=' coin copper';
+        else if(waarde<5) klasse+=' coin gold';
+        else klasse+=` bill${waarde}`;
+        const tekst=waarde<1?Math.round(waarde*100)+' ct':'€'+String(waarde).replace('.',',');
+        return `<span class="${klasse}">${tekst}</span>`;
+    }).join('')}</div>`;
+}
+function maakBetaalSet(doel, waarden) {
+    const items=[]; let totaal=0; let veilig=0;
+    while(totaal < doel && veilig++ < 20){
+        const passend=waarden.filter(v => v <= Math.max(doel-totaal, 2) || items.length===0);
+        const v=pickRandom(passend.length?passend:waarden);
+        items.push(v); totaal+=v;
+    }
+    if(totaal<doel){ const v=waarden.find(v=>totaal+v>=doel)||Math.max(...waarden); items.push(v); totaal+=v; }
+    return {items:items.sort((a,b)=>b-a), totaal:Number(totaal.toFixed(2))};
+}
+function genGeld(instellingen) {
+    const niveau=instellingen.niveau;
+    const metCenten=['begin5','midden5','groep6','groep7'].includes(niveau);
+    const waarden=metCenten?[0.5,1,2,5,10,20,50]:[1,2,5,10,20,50];
+    const variant=niveau==='begin4'?randInt(0,1):randInt(0,4);
+    if(variant===0){
+        const aantal=randInt(3,niveau==='begin4'?5:8); const items=Array.from({length:aantal},()=>pickRandom(waarden)).sort((a,b)=>b-a);
+        const totaal=Number(items.reduce((a,b)=>a+b,0).toFixed(2));
+        return maakSom(pickRandom(['Hoeveel geld zie je bij elkaar?','Tel de munten en biljetten. Wat is het totaalbedrag?','Hoeveel euro zit er in deze portemonnee?']),totaal,'geld',{customHTML:geldHTML(items)});
+    }
+    if(variant===1){
+        const prijs=metCenten?Number((randInt(250,3995)/100).toFixed(2)):randInt(4,35);
+        const set=maakBetaalSet(prijs,waarden.filter(v=>v>=1));
+        return maakSom(`Jan koopt iets van €${prijs.toFixed(2).replace('.',',')}. Hij betaalt met het geld hieronder. Hoeveel krijgt hij terug?`,Number((set.totaal-prijs).toFixed(2)),'geld',{customHTML:geldHTML(set.items),signature:`geld-terug:${prijs}:${set.totaal}`});
+    }
+    if(variant===2){
+        const prijs=metCenten?Number((randInt(350,2995)/100).toFixed(2)):randInt(5,30);
+        const set=maakBetaalSet(prijs,waarden.filter(v=>v>=1));
+        return maakSom(`Een spel kost €${prijs.toFixed(2).replace('.',',')}. Is dit geld genoeg? Vul in hoeveel euro je overhoudt.`,Number((set.totaal-prijs).toFixed(2)),'geld',{customHTML:geldHTML(set.items),signature:`geld-over:${prijs}:${set.totaal}`});
+    }
+    if(variant===3){
+        const p1=metCenten?Number((randInt(150,1295)/100).toFixed(2)):randInt(2,12); const p2=metCenten?Number((randInt(150,1295)/100).toFixed(2)):randInt(2,12);
+        return maakSom(`Sara koopt een broodje van €${p1.toFixed(2).replace('.',',')} en drinken van €${p2.toFixed(2).replace('.',',')}. Hoeveel betaalt ze samen?`,Number((p1+p2).toFixed(2)),'geld',{signature:`geld-samen:${p1}:${p2}`});
+    }
+    const budget=pickRandom([10,20,50]); const prijs=metCenten?Number((randInt(200,budget*100-100)/100).toFixed(2)):randInt(2,budget-1);
+    return maakSom(`Je hebt €${budget}. Je koopt iets van €${prijs.toFixed(2).replace('.',',')}. Hoeveel geld houd je over?`,Number((budget-prijs).toFixed(2)),'geld',{signature:`geld-budget:${budget}:${prijs}`});
+}
+
+
+function maakTabelHTML(koppen, rijen) {
+    return `<table class="mini-data-table"><thead><tr>${koppen.map(k=>`<th>${k}</th>`).join('')}</tr></thead><tbody>${rijen.map(r=>`<tr>${r.map(v=>`<td>${v}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function maakStaafdiagramHTML(labels, waarden) {
+    const maxWaarde=Math.max(...waarden); const stap=maxWaarde<=10?2:5; const schaalMax=Math.ceil(maxWaarde/stap)*stap;
+    const yLabels=[]; for(let v=schaalMax;v>=0;v-=stap)yLabels.push(`<span>${v}</span>`);
+    const bars=waarden.map((v,i)=>`<div class="bar-wrap"><div class="bar-value">${v}</div><div class="bar" style="height:${Math.max(10,Math.round(v/schaalMax*100))}px" aria-label="${labels[i]}: ${v}"></div><span class="bar-label">${labels[i]}</span></div>`).join('');
+    return `<div class="bar-chart-shell"><div class="bar-y-axis">${yLabels.join('')}</div><div class="bar-chart">${bars}</div></div>`;
+}
+function genInformatie(instellingen) {
+    const niveau=instellingen.niveau||CONFIG.defaultNiveau;
+    if(niveau==='midden4'){
+        const variant=randInt(0,2);
+        if(variant===0){ const labels=['ma','di','wo','do']; const waarden=labels.map(()=>randInt(1,10)); const i=randInt(0,3); return maakSom(`Lees de staafgrafiek. Hoeveel boeken zijn op ${labels[i]} geleend?`,waarden[i],'informatie',{customHTML:maakStaafdiagramHTML(labels,waarden)}); }
+        if(variant===1){ const start=randInt(2,20), stap=pickRandom([1,2,5]); const reeks=[start,start+stap,start+2*stap,start+3*stap]; return maakSom(`De getallen worden steeds ${stap} groter. Welk getal komt hierna?
+${reeks.join(' – ')} – ...`,start+4*stap,'informatie'); }
+        const a=randInt(2,5), b=randInt(2,5); const html=maakTabelHTML(['Dozen','Potloden'],[[1,a],[2,2*a],[b,'?']]); return maakSom(`In elke doos zitten ${a} potloden. Hoeveel potloden zitten in ${b} dozen?`,a*b,'informatie',{customHTML:html});
+    }
+    const moeilijk=['midden5','groep6','groep7'].includes(niveau); const variant=randInt(0,3);
+    if(variant===0){ const labels=['ma','di','wo','do']; const waarden=labels.map(()=>randInt(3,moeilijk?25:15)); const i=randInt(0,3); return maakSom(`Lees de staafgrafiek. Hoeveel boeken zijn op ${labels[i]} geleend?`,waarden[i],'informatie',{customHTML:maakStaafdiagramHTML(labels,waarden)}); }
+    if(variant===1){ const prijzen=[randInt(2,8),randInt(3,10),randInt(4,12)], aantallen=[randInt(2,5),randInt(2,5),randInt(2,5)], i=randInt(0,2); const html=maakTabelHTML(['Product','Aantal','Prijs per stuk'],[['Appel',aantallen[0],`€${prijzen[0]}`],['Brood',aantallen[1],`€${prijzen[1]}`],['Sap',aantallen[2],`€${prijzen[2]}`]]); return maakSom(`Gebruik de tabel. Wat kosten ${aantallen[i]} stuks ${['appel','brood','sap'][i]} samen?`,aantallen[i]*prijzen[i],'informatie',{customHTML:html}); }
+    if(variant===2){ const start=randInt(1,30), stap=pickRandom(moeilijk?[3,4,5,6,8,10]:[2,5,10]); const reeks=[start,start+stap,start+2*stap,start+3*stap]; return maakSom(`De getallen worden steeds ${stap} groter. Welk getal komt hierna?
+${reeks.join(' – ')} – ...`,start+4*stap,'informatie'); }
+    const per=randInt(2,8), aantal=randInt(3,moeilijk?12:8); const html=maakTabelHTML(['Aantal','Waarde'],[[1,per],[2,2*per],[aantal,'?']]); return maakSom(`Elke stap is × ${per}. Welke waarde hoort bij aantal ${aantal}?`,aantal*per,'informatie',{customHTML:html});
+}
+function maakGetallenlijnHTML(min,max,stappen,markerIndex) {
+    let html='<div class="number-line">';
+    for(let i=0;i<=stappen;i++){ const left=i/stappen*100; html+=`<span class="tick" style="left:${left}%"></span><span class="tick-label" style="left:${left}%">${min+(max-min)*i/stappen}</span>`; }
+    const markerPos=markerIndex/stappen*100; html+=`<span class="marker" style="left:${markerPos}%">▼</span></div>`; return html;
+}
+function genStrategie(instellingen) {
+    const niveau=instellingen.niveau||CONFIG.defaultNiveau;
+    if(niveau==='begin4'||niveau==='midden4'){
+        const stap=niveau==='begin4'?pickRandom([1,2,5]):pickRandom([5,10]); const min=0, stappen=10, max=stap*stappen; const markerIndex=randInt(1,stappen-1);
+        return maakSom(`Bekijk de getallenlijn. De streepjes gaan steeds met ${stap}. Welk getal staat bij het rode pijltje?`,min+markerIndex*stap,'strategie',{customHTML:maakGetallenlijnHTML(min,max,stappen,markerIndex),signature:`lijn:${min}:${stap}:${markerIndex}`});
+    }
+    const variant=randInt(0,3);
+    if(variant===0){ const stap=pickRandom([5,10,20,25,50]); const stappen=8, min=0, max=stap*stappen, markerIndex=randInt(1,stappen-1); return maakSom(`Bekijk de getallenlijn. Elk streepje is ${stap}. Welk getal staat bij het pijltje?`,markerIndex*stap,'strategie',{customHTML:maakGetallenlijnHTML(min,max,stappen,markerIndex),signature:`lijn:${stap}:${markerIndex}`}); }
+    if(variant===1){ const a=randInt(120,899), b=pickRandom([98,99,198,199]); return maakSom(`Reken handig: maak ${b} eerst rond en corrigeer daarna.
+${a} + ${b} =`,a+b,'strategie'); }
+    if(variant===2){ const a=randInt(400,999); let b=pickRandom([98,99,198,199,298,299]); if(b>=a)b=98; return maakSom(`Reken handig: trek eerst een rond getal af en corrigeer daarna.
+${a} − ${b} =`,a-b,'strategie'); }
+    const rond=pickRandom([100,200,500,1000]), verschil=randInt(1,9); return maakSom(`Gebruik het ronde getal ${rond}.\n${rond-verschil} + ${verschil*2} =`,rond+verschil,'strategie');
+}
+
+/* ============================================================
+   CATEGORIE-REGISTRATIE
+   Nieuwe oefening toevoegen? Eén regel hieronder toevoegen,
+   verder hoeft er nergens anders iets te veranderen.
+   ============================================================ */
+const CATEGORIES = {
+    getalbegrip: { label: 'Getalbegrip', icon: '🔢', sub: 'Splitsbomen, plaatswaarde en strategie', generator: genSplitsen },
+    tafels: { label: 'Tafels', icon: '🧮', sub: 'Passend bij het gekozen niveau', generator: genTafels },
+    optellen_aftrekken: { label: 'Optellen & aftrekken', icon: '➕', sub: 'Met passend getalbereik', generator: genOptellenAftrekken },
+    vermenigvuldigen: { label: 'Vermenigvuldigen', icon: '✖️', sub: 'Van basis tot grote keersommen', generator: genVermenigvuldigen },
+    delen: { label: 'Delen', icon: '➗', sub: 'Eerlijk verdelen en grote deelsommen', generator: genDelen },
+    klokkijken: { label: 'Klokkijken', icon: '🕒', sub: 'Analoog en digitaal', generator: genKlokkijken },
+    geld: { label: 'Geld', icon: '💶', sub: 'Munten, biljetten en bedragen', generator: genGeld },
+    breuken: { label: 'Breuken', icon: '🍕', sub: 'Vanaf groep 6 met opbouw', generator: genBreuken },
+    breukencontext: { label: 'Breuken in context', icon: '🍫', sub: 'Breuk van een hoeveelheid', generator: genBreukenContext },
+    kommagetallen: { label: 'Kommagetallen', icon: '🔸', sub: 'Optellen, aftrekken, × en :', generator: genKommagetallen },
+    procenten: { label: 'Procenten', icon: '💯', sub: 'Van basis naar toepassing', generator: genProcenten },
+    verhoudingen: { label: 'Verhoudingen & schaal', icon: '⚖️', sub: 'Verhoudingstabel en kaart', generator: genVerhoudingen },
+    meten: { label: 'Meten & omrekenen', icon: '📏', sub: 'Lengte, gewicht, inhoud en tijd', generator: genMeten },
+    meetkunde: { label: 'Omtrek, oppervlakte & inhoud', icon: '📐', sub: 'Vormen en maten', generator: genMeetkunde },
+    schatten: { label: 'Schatten', icon: '🎯', sub: 'Controleren met een schatting', generator: genSchatten },
+    informatie: { label: 'Grafieken, tabellen & patronen', icon: '📊', sub: 'Informatie aflezen en reeksen', generator: genInformatie },
+    strategie: { label: 'Getallenlijn & slim rekenen', icon: '↔️', sub: 'Plaatsen, compenseren en redeneren', generator: genStrategie },
+    redactie: { label: 'Redactiesommen', icon: '📚', sub: 'Eén- en meerstapsproblemen', generator: genRedactie }
+};
+
+/* ============================================================
+   REKENSTRATEGIEËN
+   Eén centrale uitleg per rekendomein. Nieuwe strategieën kunnen
+   hier worden toegevoegd zonder de weergavecode aan te passen.
+   ============================================================ */
+const REKENSTRATEGIEEN = {
+    getalbegrip: {
+        titel: 'Splits het getal in handige delen',
+        stappen: ['Kijk naar de plaatswaarde van elk cijfer.', 'Schrijf duizenden, honderden, tientallen en eenheden apart.', 'Controleer of de delen samen weer het oorspronkelijke getal vormen.'],
+        voorbeeld: '4.582 = 4.000 + 500 + 80 + 2'
+    },
+    tafels: {
+        titel: 'Gebruik een bekende tafel',
+        stappen: ['Zoek de twee factoren.', 'Gebruik een tafel die je al kent of splits één factor.', 'Controleer met de omgekeerde deelsom.'],
+        voorbeeld: '7 × 14 = 7 × 10 + 7 × 4 = 70 + 28 = 98'
+    },
+    optellen_aftrekken: {
+        titel: 'Reken onder elkaar of splits',
+        stappen: ['Zet eenheden, tientallen en honderdtallen recht onder elkaar.', 'Reken van rechts naar links.', 'Onthoud of leen wanneer dat nodig is.'],
+        voorbeeld: '  468\n+ 257\n-----\n  725'
+    },
+    vermenigvuldigen: {
+        titel: 'Splits de tweede factor',
+        stappen: ['Splits het grootste getal in tientallen en eenheden.', 'Vermenigvuldig elk deel apart.', 'Tel de tussenantwoorden bij elkaar op.'],
+        voorbeeld: '36 × 24 = 36 × 20 + 36 × 4 = 720 + 144 = 864'
+    },
+    delen: {
+        titel: 'Delen met hapjes of staartdeling',
+        stappen: ['Bepaal hoe vaak de deler in een handig deel past.', 'Trek dat deel af en ga verder met de rest.', 'Controleer: uitkomst × deler + rest = deeltal.'],
+        voorbeeld: '936 : 8\n800 : 8 = 100\n136 : 8 = 17\nDus 936 : 8 = 117'
+    },
+    breuken: {
+        titel: 'Kijk eerst naar teller en noemer',
+        stappen: ['De noemer vertelt in hoeveel gelijke delen het geheel is verdeeld.', 'De teller vertelt hoeveel delen je gebruikt.', 'Maak breuken zo nodig gelijknamig of vereenvoudig teller en noemer met hetzelfde getal.'],
+        voorbeeld: `3/4 van 28
+
+Stap 1: bereken 1/4
+28 : 4 = 7
+
+Stap 2: bereken 3/4
+7 × 3 = 21`
+    },
+    breukencontext: {
+        titel: 'Bereken eerst één breukdeel',
+        stappen: ['Deel de hele hoeveelheid door de noemer.', 'Vermenigvuldig de uitkomst met de teller.', 'Schrijf de juiste eenheid achter het antwoord.'],
+        voorbeeld: `2/5 van 30 koekjes
+
+Stap 1: bereken 1/5
+30 : 5 = 6 koekjes
+
+Stap 2: bereken 2/5
+6 × 2 = 12 koekjes`
+    },
+    kommagetallen: {
+        titel: 'Zet de komma’s recht onder elkaar',
+        stappen: ['Schrijf de getallen met de komma onder de komma.', 'Vul eventueel nullen aan.', 'Reken alsof het hele getallen zijn en plaats de komma terug.'],
+        voorbeeld: '  3,50\n+ 1,75\n------\n  5,25'
+    },
+    procenten: {
+        titel: 'Reken via 1%, 10% of een bekende breuk',
+        stappen: ['Bepaal welk eenvoudig percentage helpt.', 'Gebruik 50% = 1/2, 25% = 1/4 en 10% = delen door 10.', 'Bouw daarmee het gevraagde percentage op.'],
+        voorbeeld: '25% van 240 = 1/4 van 240 = 60'
+    },
+    verhoudingen: {
+        titel: 'Gebruik een verhoudingstabel',
+        stappen: ['Schrijf de bij elkaar horende hoeveelheden naast elkaar.', 'Reken eerst naar 1 als dat handig is.', 'Vermenigvuldig daarna naar de gevraagde hoeveelheid.'],
+        voorbeeld: `Voorbeeld verhoudingstabel:
+3 pakken → 18 flessen
+1 pak → 6 flessen
+8 pakken → 48 flessen`
+    },
+    meten: {
+        titel: 'Kies de juiste omrekenstap',
+        stappen: ['Bepaal van welke eenheid je naar welke eenheid gaat.', 'Naar een kleinere eenheid: vermenigvuldigen.', 'Naar een grotere eenheid: delen.'],
+        voorbeeld: '4 meter = 4 × 100 = 400 centimeter'
+    },
+    meetkunde: {
+        titel: 'Kies de juiste formule',
+        stappen: ['Omtrek: tel alle zijden op.', 'Oppervlakte rechthoek: lengte × breedte.', 'Inhoud balk: lengte × breedte × hoogte.'],
+        voorbeeld: `Kies eerst wat gevraagd wordt:
+
+Omtrek: alle zijden optellen
+Oppervlakte: lengte × breedte
+Inhoud: lengte × breedte × hoogte`
+    },
+    schatten: {
+        titel: 'Rond eerst handig af',
+        stappen: ['Rond ieder getal af zoals in de opdracht staat.', 'Reken met de afgeronde getallen.', 'Gebruik de schatting om een exact antwoord te controleren.'],
+        voorbeeld: '498 + 304 ≈ 500 + 300 = 800'
+    },
+    redactie: {
+        titel: 'Haal de rekensom uit het verhaal',
+        stappen: ['Onderstreep de getallen en de vraag.', 'Bepaal welke bewerking of bewerkingen nodig zijn.', 'Reken stap voor stap en controleer of het antwoord logisch is.', 'Schrijf de gevraagde eenheid bij het antwoord.'],
+        voorbeeld: 'Eerst uitrekenen wat er totaal is; daarna aftrekken wat gebruikt of verkocht is.'
+    }
+};
+
+function getStrategieVoorSom(somObj) {
+    return REKENSTRATEGIEEN[somObj.strategie] || REKENSTRATEGIEEN[somObj.categorie] || REKENSTRATEGIEEN.redactie;
+}
+
+function renderStrategie(somObj) {
+    const strategie = getStrategieVoorSom(somObj);
+    const stappen = strategie.stappen.map(stap => `<li>${stap}</li>`).join('');
+    return `<div class="strategy-card"><h4>💡 ${strategie.titel}</h4><ol>${stappen}</ol><div class="strategy-example">Voorbeeld:\n${strategie.voorbeeld}</div></div>`;
+}
+
+/* ============================================================
+   VALIDATIE + ANTI-DUPLICAAT
+   ============================================================ */
+function valideerSom(som) {
+    if (!som) return false;
+    if (som.isSplitsen) {
+        const a = parseFloat(som.antwoord);
+        return som.splitsData && !Number.isNaN(a);
+    }
+    return typeof som.vraag === 'string' && som.vraag.length > 0 &&
+        typeof som.antwoord === 'string' && som.antwoord.length > 0 && som.antwoord !== 'NaN';
+}
+
+function genereerUniekeGeldigeSom(catKey, instellingen, gebruikteSignatures) {
+    const generator=CATEGORIES[catKey].generator; let som=null;
+    for(let poging=0;poging<CONFIG.duplicateRetryLimit*4;poging++){
+        som=generator(instellingen);
+        if(valideerSom(som) && !gebruikteSignatures.has(som.signature)){
+            gebruikteSignatures.add(som.signature); return som;
+        }
+    }
+    console.warn(`Geen nieuwe unieke som meer beschikbaar voor categorie "${catKey}".`);
+    return null;
+}
+
+/* ============================================================
+   ANTWOORD-NORMALISATIE
+   ============================================================ */
+function normaliseerAntwoord(ruw) {
+    if (typeof ruw !== 'string') return '';
+    return ruw.trim().replace(',', '.').replace(/\s+/g, ' ');
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        CONFIG, CATEGORIES,
+        randInt, pickRandom, maakSom, maakSplitsSom,
+        genTafels, genSchatten, genSplitsen, genBreuken, genBreukenContext, genInformatie, genStrategie,
+        genOptellenAftrekken, genVermenigvuldigen, genDelen, genKlokkijken, genGeld, genRedactie,
+        valideerSom, genereerUniekeGeldigeSom, normaliseerAntwoord,
+        REDACTIE_DATASET, POOL_BREUKEN_CONTEXT
+    };
+}
+
+'use strict';
+
+/* ============================================================
+   VEILIGE LOCALSTORAGE WRAPPER
+   Voorkomt crashes in bijv. privé-browsen waar localStorage
+   kan ontbreken of vol kan zitten.
+   ============================================================ */
+const Storage = {
+    get(key, fallback) {
+        try {
+            const raw = localStorage.getItem(key);
+            if (raw === null) return fallback;
+            return JSON.parse(raw);
+        } catch (e) {
+            console.warn('Kon opslag niet lezen voor', key, e);
+            return fallback;
+        }
+    },
+    set(key, value) {
+        try {
+            localStorage.setItem(key, JSON.stringify(value));
+            return true;
+        } catch (e) {
+            console.warn('Kon opslag niet schrijven voor', key, e);
+            return false;
+        }
+    }
+};
+
+/* ============================================================
+   APP-STATUS (alles op één plek, geen losse globale variabelen)
+   ============================================================ */
+const PROFILE_INDEX_KEY = 'rk_profiles_v1';
+const ACTIVE_PROFILE_KEY = 'rk_active_profile_v1';
+
+function maakProfielId(naam) {
+    return (naam || 'leerling').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now().toString(36);
+}
+
+let profiles = Storage.get(PROFILE_INDEX_KEY, []);
+if (!Array.isArray(profiles) || profiles.length === 0) {
+    profiles = [{ id:'standaard', naam:'Leerling 1' }];
+    Storage.set(PROFILE_INDEX_KEY, profiles);
+}
+let activeProfileId = Storage.get(ACTIVE_PROFILE_KEY, profiles[0].id);
+if (!profiles.some(p => p.id === activeProfileId)) activeProfileId = profiles[0].id;
+
+function profielOpslagSleutel(basis) {
+    return `${basis}__${activeProfileId}`;
+}
+
+function profielGet(type, fallback) {
+    const basis = CONFIG.storageKeys[type];
+    let waarde = Storage.get(profielOpslagSleutel(basis), undefined);
+    if (waarde === undefined && activeProfileId === 'standaard') {
+        waarde = Storage.get(basis, undefined); // eenmalige migratie van oudere appversie
+        if (waarde !== undefined) Storage.set(profielOpslagSleutel(basis), waarde);
+    }
+    return waarde === undefined ? fallback : waarde;
+}
+
+function profielSet(type, value) {
+    return Storage.set(profielOpslagSleutel(CONFIG.storageKeys[type]), value);
+}
+
+function buildDefaultProgress() {
+    const progress = {};
+    Object.keys(CATEGORIES).forEach(key => {
+        progress[key] = { totaal: 0, goed: 0 };
+    });
+    return progress;
+}
+
+const state = {
+    xp: profielGet('points', 0),
+    history: profielGet('history', []),
+    progress: profielGet('progress', buildDefaultProgress()),
+    selectedCategories: [],
+    selectedTafels: CONFIG.defaultTafels.slice(),
+    sommenPerOefening: CONFIG.defaultSommenPerOefening,
+    getalbereik: CONFIG.defaultGetalbereik,
+    niveau: CONFIG.defaultNiveau,
+    werkbladAlBeoordeeld: false,
+    huidigWerkblad: [], // de op dit moment getoonde, nog na te kijken sommen
+    reward500Claimed: profielGet('reward500', false)
+};
+
+// Zorg dat elke bekende categorie een progress-record heeft, ook als er
+// een nieuwe categorie is toegevoegd na een eerder bezoek (localStorage
+// kan een oudere structuur bevatten).
+if (state.progress.splitsen && !state.progress.getalbegrip) state.progress.getalbegrip = state.progress.splitsen;
+Object.keys(CATEGORIES).forEach(key => {
+    if (!state.progress[key]) {
+        state.progress[key] = { totaal: 0, goed: 0 };
+    }
+});
+
+/* ============================================================
+   NAVIGATIE (gefixt: één consistente naamgeving overal)
+   ============================================================ */
+function switchView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    const el = document.getElementById(`view-${name}`);
+    if (el) {
+        el.classList.add('active');
+    } else {
+        console.error('Onbekend scherm aangevraagd:', name);
+    }
+    window.scrollTo(0, 0);
+}
+
+function terugNaarHome() {
+    updateStatsUI();
+    switchView('dashboard');
+}
+
+/* ============================================================
+   DASHBOARD: TEGELS OPBOUWEN VANUIT DE CATEGORY-REGISTRATIE
+   ============================================================ */
+function bouwTegels() {
+    const grid = document.getElementById('tileGrid');
+    grid.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+    const toegestaan = LEVELS[state.niveau].categories;
+    Object.entries(CATEGORIES).filter(([key]) => toegestaan.includes(key)).forEach(([key, cat]) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tile' + (state.selectedCategories.includes(key) ? ' active' : '') + (cat.wide ? ' tile-wide' : '');
+        btn.id = `tile-${key}`;
+        btn.dataset.action = 'toggle-tile';
+        btn.dataset.cat = key;
+        btn.setAttribute('aria-pressed', state.selectedCategories.includes(key) ? 'true' : 'false');
+        btn.innerHTML = `
+            <div class="tile-icon" aria-hidden="true">${cat.icon}</div>
+            <div><h3>${cat.label}</h3><p>${cat.sub}</p></div>
+        `;
+        fragment.appendChild(btn);
+    });
+    grid.appendChild(fragment);
+}
+
+function bouwTafelCheckboxes() {
+    const container = document.getElementById('tafelSubCheckboxes');
+    container.innerHTML = '';
+    const profiel = LEVELS[state.niveau];
+    const fragment = document.createDocumentFragment();
+    profiel.tafels.forEach(t => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'btn-sub' + (state.selectedTafels.includes(t) ? ' active' : '');
+        btn.id = `tfbtn-${t}`;
+        btn.dataset.action = 'toggle-tafel';
+        btn.dataset.tafel = String(t);
+        btn.setAttribute('aria-pressed', state.selectedTafels.includes(t) ? 'true' : 'false');
+        btn.textContent = String(t);
+        fragment.appendChild(btn);
+    });
+    container.appendChild(fragment);
+}
+
+/* ============================================================
+   TEGELS & INSTELLINGEN AAN/UIT ZETTEN
+   ============================================================ */
+function toggleTile(cat) {
+    const tile = document.getElementById(`tile-${cat}`);
+    const idx = state.selectedCategories.indexOf(cat);
+    if (idx > -1) {
+        state.selectedCategories.splice(idx, 1);
+        tile.classList.remove('active');
+        tile.setAttribute('aria-pressed', 'false');
+    } else {
+        state.selectedCategories.push(cat);
+        tile.classList.add('active');
+        tile.setAttribute('aria-pressed', 'true');
+    }
+    document.getElementById('tafelInlinePanel').style.display =
+        state.selectedCategories.includes('tafels') ? 'block' : 'none';
+}
+
+function toggleTafelNummer(t) {
+    const btn = document.getElementById(`tfbtn-${t}`);
+    const idx = state.selectedTafels.indexOf(t);
+    if (idx > -1) {
+        if (state.selectedTafels.length > 1) {
+            state.selectedTafels.splice(idx, 1);
+            btn.classList.remove('active');
+            btn.setAttribute('aria-pressed', 'false');
+        }
+        // Als dit de laatste geselecteerde tafel is, laten we hem aan staan
+        // zodat er altijd minstens één tafel overblijft om mee te oefenen.
+    } else {
+        state.selectedTafels.push(t);
+        btn.classList.add('active');
+        btn.setAttribute('aria-pressed', 'true');
+    }
+}
+
+const MAX_SOMMEN_PER_OEFENING = 5000;
+
+function setLengte(l) {
+    state.sommenPerOefening = l;
+    document.querySelectorAll('#lengteGroep .btn-sub').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.lengte, 10) === l);
+    });
+    const customInput = document.getElementById('customLengteInput');
+    if (customInput) customInput.value = '';
+    toonLengteWaarschuwingIndienNodig(l);
+}
+
+function setLengteCustom() {
+    const input = document.getElementById('customLengteInput');
+    let waarde = parseInt(input.value, 10);
+    if (!Number.isFinite(waarde) || waarde < 1) {
+        alert('Vul een geldig aantal in (minimaal 1).');
+        return;
+    }
+    if (waarde > MAX_SOMMEN_PER_OEFENING) {
+        alert(`Het maximum is ${MAX_SOMMEN_PER_OEFENING} sommen per oefening (anders wordt de pagina te zwaar om te laden). Er is nu ${MAX_SOMMEN_PER_OEFENING} gebruikt.`);
+        waarde = MAX_SOMMEN_PER_OEFENING;
+        input.value = String(waarde);
+    }
+    state.sommenPerOefening = waarde;
+    document.querySelectorAll('#lengteGroep .btn-sub').forEach(b => b.classList.remove('active'));
+    toonLengteWaarschuwingIndienNodig(waarde);
+}
+
+function toonLengteWaarschuwingIndienNodig(l) {
+    document.getElementById('lengteWaarschuwing').style.display = l >= 500 ? 'block' : 'none';
+}
+
+function setBereik(r) {
+    state.getalbereik = r;
+    document.querySelectorAll('#bereikGroep .btn-sub').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.bereik, 10) === r);
+    });
+}
+
+/* ============================================================
+   PUNTEN, MEDAILLES EN STATISTIEKEN
+   ============================================================ */
+function setNiveau(niveau) {
+    state.niveau = niveau;
+    const profiel = LEVELS[niveau];
+    document.querySelectorAll('#niveauGroep .btn-sub').forEach(b => b.classList.toggle('active', b.dataset.niveau === niveau));
+    document.getElementById('niveauUitleg').textContent = profiel.uitleg;
+    document.getElementById('headerLevelText').textContent = profiel.label;
+    state.getalbereik = profiel.maxGetal;
+    state.selectedTafels = profiel.tafels.slice(0, Math.min(4, profiel.tafels.length));
+    state.selectedCategories = state.selectedCategories.filter(cat => profiel.categories.includes(cat));
+    bouwTegels();
+    bouwTafelCheckboxes();
+    document.getElementById('tafelInlinePanel').style.display = state.selectedCategories.includes('tafels') ? 'block' : 'none';
+    document.getElementById('bereikGroep').closest('.config-block').style.display = ['begin4','midden4','begin5','midden5'].includes(niveau) ? 'none' : 'block';
+}
+
+function toggleSomPaneel(panelId, knop) {
+    const panel = document.getElementById(panelId);
+    if (!panel) return;
+    const row = panel.closest('.som-row');
+    const wasOpen = panel.classList.contains('open');
+    row.querySelectorAll('.som-panel.open').forEach(p => p.classList.remove('open'));
+    row.querySelectorAll('.som-tool-btn[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    if (!wasOpen) {
+        panel.classList.add('open');
+        knop.setAttribute('aria-expanded', 'true');
+        const canvas = panel.querySelector('.scratch-canvas');
+        if (canvas) initialiseCanvas(canvas);
+    }
+}
+
+function initialiseCanvas(canvas) {
+    if (canvas.dataset.ready === 'true') return;
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.max(1, Math.round(rect.width * ratio));
+    canvas.height = Math.max(1, Math.round(rect.height * ratio));
+    const ctx = canvas.getContext('2d');
+    ctx.scale(ratio, ratio);
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = '#25324b';
+
+    let tekenen = false;
+    const positie = event => {
+        const r = canvas.getBoundingClientRect();
+        return { x: event.clientX - r.left, y: event.clientY - r.top };
+    };
+    canvas.addEventListener('pointerdown', event => {
+        tekenen = true;
+        canvas.setPointerCapture(event.pointerId);
+        const p = positie(event);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+    });
+    canvas.addEventListener('pointermove', event => {
+        if (!tekenen) return;
+        const p = positie(event);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+    });
+    const stop = () => { tekenen = false; ctx.beginPath(); };
+    canvas.addEventListener('pointerup', stop);
+    canvas.addEventListener('pointercancel', stop);
+    canvas.addEventListener('pointerleave', stop);
+    canvas.dataset.ready = 'true';
+}
+
+function setScratchMode(index, mode, knop) {
+    const textarea = document.getElementById(`scratch-text-${index}`);
+    const canvas = document.getElementById(`canvas-${index}`);
+    if (!textarea || !canvas) return;
+    const paneel = textarea.closest('.mini-scratch');
+    paneel.querySelectorAll('.scratch-mode-btn').forEach(btn => btn.classList.toggle('active', btn === knop));
+    const tekenen = mode === 'draw';
+    textarea.classList.toggle('hidden', tekenen);
+    canvas.classList.toggle('active', tekenen);
+    if (tekenen) initialiseCanvas(canvas);
+    else textarea.focus();
+}
+
+function wisSomKladblok(index) {
+    const canvas = document.getElementById(`canvas-${index}`);
+    const textarea = document.getElementById(`scratch-text-${index}`);
+    if (textarea) textarea.value = '';
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function bouwProfielKeuze() {
+    const select = document.getElementById('studentSelect');
+    if (!select) return;
+    select.innerHTML = '';
+    profiles.forEach(profiel => {
+        const option = document.createElement('option');
+        option.value = profiel.id;
+        option.textContent = profiel.naam;
+        option.selected = profiel.id === activeProfileId;
+        select.appendChild(option);
+    });
+}
+
+function laadActiefProfiel() {
+    state.xp = profielGet('points', 0);
+    state.history = profielGet('history', []);
+    state.progress = profielGet('progress', buildDefaultProgress());
+    state.reward500Claimed = profielGet('reward500', false);
+    Object.keys(CATEGORIES).forEach(key => {
+        if (!state.progress[key]) state.progress[key] = { totaal:0, goed:0 };
+    });
+    document.getElementById('xpDisplay').textContent = String(state.xp);
+    updateRewardUI();
+    updateStatsUI();
+    updateHistoryUI();
+}
+
+function wisselLeerling(id) {
+    if (!profiles.some(p => p.id === id)) return;
+    activeProfileId = id;
+    Storage.set(ACTIVE_PROFILE_KEY, activeProfileId);
+    laadActiefProfiel();
+}
+
+function voegLeerlingToe() {
+    const naam = prompt('Hoe heet de leerling?');
+    if (!naam || !naam.trim()) return;
+    const schoon = naam.trim().slice(0, 30);
+    const profiel = { id: maakProfielId(schoon), naam: schoon };
+    profiles.push(profiel);
+    Storage.set(PROFILE_INDEX_KEY, profiles);
+    activeProfileId = profiel.id;
+    Storage.set(ACTIVE_PROFILE_KEY, activeProfileId);
+    bouwProfielKeuze();
+    laadActiefProfiel();
+}
+
+function updateRewardUI() {
+    const threshold = CONFIG.rewardThreshold;
+    const voortgang = Math.min(state.xp, threshold);
+    const pct = Math.min(100, Math.round((voortgang / threshold) * 100));
+    const tekst = document.getElementById('rewardProgressText');
+    const balk = document.getElementById('rewardProgressFill');
+    if (tekst) tekst.textContent = `${voortgang} / ${threshold}`;
+    if (balk) balk.style.width = `${pct}%`;
+}
+
+function controleerBeloning(vorigePunten) {
+    updateRewardUI();
+    if (vorigePunten < CONFIG.rewardThreshold && state.xp >= CONFIG.rewardThreshold && !state.reward500Claimed) {
+        state.reward500Claimed = true;
+        profielSet('reward500', true);
+        document.getElementById('rewardModal').classList.add('open');
+    }
+}
+
+function sluitBeloning() {
+    document.getElementById('rewardModal').classList.remove('open');
+}
+
+function resetPunten() {
+    const bevestig = confirm('Weet je zeker dat je alle verdiende punten wilt resetten naar 0?\n\n(Geen zorgen: de medailles en voortgang per onderdeel worden NIET gewist!)');
+    if (!bevestig) return;
+    state.xp = 0;
+    profielSet('points', 0);
+    state.reward500Claimed = false;
+    profielSet('reward500', false);
+    document.getElementById('xpDisplay').textContent = '0';
+    updateRewardUI();
+}
+
+function resetScores() {
+    const bevestig = confirm('Weet je zeker dat je alle scores, medailles en voortgang wilt wissen?\n\nJe punten blijven behouden. Deze actie kan niet ongedaan worden gemaakt.');
+    if (!bevestig) return;
+    state.history = [];
+    state.progress = buildDefaultProgress();
+    profielSet('history', state.history);
+    profielSet('progress', state.progress);
+    updateStatsUI();
+    updateHistoryUI();
+    alert('Alle scores en voortgang zijn gereset. Je punten zijn behouden.');
+}
+
+function getMedaille(percentage, totaalGemaakt) {
+    if (totaalGemaakt === 0) return `<span class="level-badge" style="background:#e0e5f2; color:#a3aed0;">Geen data</span>`;
+    if (percentage < 60) return `<span class="level-badge" style="background:#ffebee; color:#c62828;">🥉 Beginner</span>`;
+    if (percentage < 80) return `<span class="level-badge" style="background:#e8f5e9; color:#2e7d32;">🥈 Goed</span>`;
+    if (percentage < 95) return `<span class="level-badge" style="background:#e3f2fd; color:#1565c0;">🥇 Ster</span>`;
+    return `<span class="level-badge" style="background:#fff8e1; color:#f57f17;">👑 Meester</span>`;
+}
+
+function updateStatsUI() {
+    const tbody = document.getElementById('statsTableBody');
+    tbody.innerHTML = '';
+    const fragment = document.createDocumentFragment();
+
+    let totaalSommenApp = 0;
+    let totaalGoedApp = 0;
+    let besteOnderdeel = '-';
+    let bestePerc = -1;
+    let minsteOnderdeel = '-';
+    let minstePerc = 101;
+
+    for (const [key, data] of Object.entries(state.progress)) {
+        totaalSommenApp += data.totaal;
+        totaalGoedApp += data.goed;
+
+        let percentage = 0;
+        if (data.totaal > 0) {
+            percentage = Math.round((data.goed / data.totaal) * 100);
+            const kortLabel = CATEGORIES[key] ? CATEGORIES[key].label.replace(/^\d+[a-z]?\.\s*/, '') : key;
+            if (data.totaal >= 5 && percentage > bestePerc) {
+                bestePerc = percentage;
+                besteOnderdeel = kortLabel;
+            }
+            if (data.totaal >= 5 && percentage < minstePerc) {
+                minstePerc = percentage;
+                minsteOnderdeel = kortLabel;
+            }
+        }
+
+        const label = CATEGORIES[key] ? CATEGORIES[key].label : key;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td style="font-weight:600;">${label}</td>
+            <td>
+                <div style="margin-bottom: 2px;"><strong>${data.goed}</strong> / ${data.totaal} <span style="font-size:10px; color:var(--text-muted);">(${percentage}%)</span></div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" style="width: ${percentage}%;"></div>
+                </div>
+            </td>
+            <td>${getMedaille(percentage, data.totaal)}</td>
+        `;
+        fragment.appendChild(row);
+    }
+    tbody.appendChild(fragment);
+
+    document.getElementById('statTotaalSommen').textContent = String(totaalSommenApp);
+    document.getElementById('statTotaalGoed').textContent = String(totaalGoedApp);
+    document.getElementById('statBesteOnderdeel').textContent = besteOnderdeel + (bestePerc !== -1 ? ` (${bestePerc}%)` : '');
+    document.getElementById('statMinderOnderdeel').textContent = minsteOnderdeel + (minstePerc !== 101 ? ` (${minstePerc}%)` : '');
+}
+
+function updateHistoryUI() {
+    const container = document.getElementById('historyContainer');
+    if (state.history.length === 0) {
+        container.innerHTML = `<p class="empty-hint">Nog geen eerdere resultaten opgeslagen.</p>`;
+        return;
+    }
+    container.innerHTML = state.history.slice(0, 4).map(h => `
+        <div class="res-row">
+            <strong>Blad (${h.aantalOnderdelen} ond.)</strong>
+            <span>Score: ${h.score} (${h.datum})</span>
+        </div>
+    `).join('');
+}
+
+/* ============================================================
+   WERKBLAD GENEREREN
+   ============================================================ */
+function genereerWerkblad() {
+    if (state.selectedCategories.length === 0) {
+        alert('Kies eerst minimaal één onderdeel om te oefenen!');
+        return;
+    }
+
+    const container = document.getElementById('worksheetContainer');
+    container.innerHTML = '';
+    state.huidigWerkblad = [];
+    state.werkbladAlBeoordeeld = false;
+
+    const fragment = document.createDocumentFragment();
+    let globaleIndex = 0;
+    let tekortAanUniekeSommen = false;
+
+    state.selectedCategories.forEach(cat => {
+        const header = document.createElement('div');
+        header.className = 'category-header';
+        header.textContent = CATEGORIES[cat] ? CATEGORIES[cat].label : cat;
+        fragment.appendChild(header);
+
+        const subContainer = document.createElement('div');
+        subContainer.className = 'worksheet-container';
+
+        const gebruikteSignatures = new Set();
+        const instellingen = {
+            selectedTafels: state.selectedTafels,
+            getalbereik: state.getalbereik,
+            niveau: state.niveau
+        };
+
+        for (let i = 0; i < state.sommenPerOefening; i++) {
+            const somObj = genereerUniekeGeldigeSom(cat, instellingen, gebruikteSignatures);
+            if (!somObj) { tekortAanUniekeSommen = true; break; }
+            somObj.categorie = cat;
+            somObj.index = globaleIndex;
+            state.huidigWerkblad.push(somObj);
+
+            const row = document.createElement('div');
+            row.className = 'som-row';
+            row.id = `som-row-${globaleIndex}`;
+
+            let somInhoud = '';
+            if (somObj.isSplitsen) {
+                const linksHTML = somObj.splitsData.links === '?'
+                    ? `<label class="visually-hidden" for="input-${globaleIndex}">Ontbrekend getal, links</label><input type="text" inputmode="numeric" class="splits-input-box" id="input-${globaleIndex}">`
+                    : somObj.splitsData.links;
+                const rechtsHTML = somObj.splitsData.rechts === '?'
+                    ? `<label class="visually-hidden" for="input-${globaleIndex}">Ontbrekend getal, rechts</label><input type="text" inputmode="numeric" class="splits-input-box" id="input-${globaleIndex}">`
+                    : somObj.splitsData.rechts;
+
+                somInhoud = `
+                    <div class="som-main">
+                        <div class="som-vraag">Vul het missende getal in het splitsingsschema in:</div>
+                        <div class="visual-splits-diagram">
+                            <div class="splits-top">${somObj.splitsData.totaal}</div>
+                            <div class="splits-branches">
+                                <div class="splits-left">${linksHTML}</div>
+                                <div class="splits-rechts">${rechtsHTML}</div>
+                            </div>
+                        </div>
+                        <div class="feedback-icon" id="fb-${globaleIndex}" aria-live="polite"></div>
+                    </div>`;
+            } else {
+                somInhoud = `
+                    <div class="som-main">
+                        ${somObj.customHTML ? `<div class="som-custom">${somObj.customHTML}</div>` : ``}<div class="som-vraag">${somObj.vraag}</div>
+                        <div class="som-input-wrapper">
+                            <label class="visually-hidden" for="input-${globaleIndex}">Antwoord voor som ${globaleIndex + 1}</label>
+                            <input type="text" inputmode="decimal" class="som-input" id="input-${globaleIndex}" placeholder="?">
+                            <span class="feedback-icon" id="fb-${globaleIndex}" aria-live="polite"></span>
+                        </div>
+                    </div>`;
+            }
+
+            row.innerHTML = `${somInhoud}
+                <div class="som-tools">
+                    <button type="button" class="som-tool-btn" data-action="toggle-som-paneel" data-panel="scratch-${globaleIndex}" aria-expanded="false" title="Kladblok" aria-label="Open kladblok">📝</button>
+                </div>
+                <div class="som-panel" id="scratch-${globaleIndex}">
+                    <div class="som-panel-grid">
+                        <div class="mini-scratch">
+                            <div class="mini-scratch-head">
+                                <span>Werk deze som uit</span>
+                                <div class="mini-scratch-actions">
+                                    <button type="button" data-action="wis-som-kladblok" data-index="${globaleIndex}" aria-label="Wis kladblok van som ${globaleIndex + 1}" title="Wissen">🗑️</button>
+                                </div>
+                            </div>
+                            <div class="scratch-mode-switch" role="group" aria-label="Kies kladblokmodus">
+                                <button type="button" class="scratch-mode-btn active" data-action="set-scratch-mode" data-index="${globaleIndex}" data-mode="type">⌨️ Typen</button>
+                                <button type="button" class="scratch-mode-btn" data-action="set-scratch-mode" data-index="${globaleIndex}" data-mode="draw">✏️ Tekenen</button>
+                            </div>
+                            <textarea class="scratch-textarea" id="scratch-text-${globaleIndex}" placeholder="Typ hier je tussenstappen…" aria-label="Getypt kladblok voor som ${globaleIndex + 1}"></textarea>
+                            <canvas class="scratch-canvas" id="canvas-${globaleIndex}" data-index="${globaleIndex}" aria-label="Tekenkladblok voor som ${globaleIndex + 1}"></canvas>
+                        </div>
+                    </div>
+                </div>
+`;
+
+            subContainer.appendChild(row);
+            globaleIndex++;
+        }
+        fragment.appendChild(subContainer);
+    });
+
+    container.appendChild(fragment);
+
+    document.getElementById('btnControleer').style.display = 'block';
+    document.getElementById('btnNaarScore').style.display = 'none';
+
+    switchView('werkblad');
+    if (tekortAanUniekeSommen) {
+        setTimeout(() => alert('Voor de gekozen selectie waren minder unieke sommen beschikbaar dan het gekozen aantal. De app heeft alleen unieke opgaven geplaatst en geen dubbelen toegevoegd.'), 50);
+    }
+}
+
+/* ============================================================
+   NAKIJKEN
+   ============================================================ */
+function nakijkenWerkblad() {
+    if (state.werkbladAlBeoordeeld) return;
+    const totaalGemaakt = state.huidigWerkblad.length;
+    if (totaalGemaakt === 0) return;
+
+    let goedTelling = 0;
+    const updatesPerCategorie = {};
+    state.selectedCategories.forEach(c => {
+        updatesPerCategorie[c] = { goed: 0, totaal: 0 };
+    });
+
+    state.huidigWerkblad.forEach(som => {
+        const inputEl = document.getElementById(`input-${som.index}`);
+        const rowEl = document.getElementById(`som-row-${som.index}`);
+        const fbEl = document.getElementById(`fb-${som.index}`);
+
+        const userAnsRuw = inputEl ? inputEl.value : '';
+        const userAns = normaliseerAntwoord(userAnsRuw);
+        const targetAns = normaliseerAntwoord(som.antwoord);
+
+        updatesPerCategorie[som.categorie].totaal++;
+
+        if (userAns === '') {
+            rowEl.className = 'som-row unanswered';
+            fbEl.innerHTML = `⚠️ <span style="font-size:11px; font-weight:normal; color:var(--danger);">(niet ingevuld, antwoord: ${som.antwoord})</span>`;
+        } else if (userAns === targetAns) {
+            rowEl.className = 'som-row correct';
+            fbEl.innerHTML = '✔️';
+            goedTelling++;
+            updatesPerCategorie[som.categorie].goed++;
+        } else {
+            rowEl.className = 'som-row incorrect';
+            fbEl.innerHTML = `❌ <span style="font-size:11px; font-weight:normal; color:var(--danger);">(${som.antwoord})</span>`;
+        }
+    });
+
+    // Punten
+    const verdiendePunten = goedTelling;
+    const vorigePunten = state.xp;
+    state.xp += verdiendePunten;
+    profielSet('points', state.xp);
+    document.getElementById('xpDisplay').textContent = String(state.xp);
+    controleerBeloning(vorigePunten);
+
+    // Voortgang per categorie
+    for (const [cat, data] of Object.entries(updatesPerCategorie)) {
+        state.progress[cat].totaal += data.totaal;
+        state.progress[cat].goed += data.goed;
+    }
+    profielSet('progress', state.progress);
+
+    // Geschiedenis (beperkt tot CONFIG.historyLimit)
+    const nu = new Date();
+    const datumStr = `${nu.getDate()}-${nu.getMonth() + 1} ${nu.getHours()}:${(nu.getMinutes() < 10 ? '0' : '') + nu.getMinutes()}`;
+    state.history.unshift({
+        aantalOnderdelen: state.selectedCategories.length,
+        score: `${goedTelling} / ${totaalGemaakt}`,
+        datum: datumStr
+    });
+    if (state.history.length > CONFIG.historyLimit) {
+        state.history.length = CONFIG.historyLimit;
+    }
+    profielSet('history', state.history);
+
+    // Evaluatiescherm vullen
+    document.getElementById('evalScore').textContent = `${goedTelling} / ${totaalGemaakt}`;
+    document.getElementById('evalPoints').textContent = `+${verdiendePunten} Punten toegevoegd!`;
+
+    const perc = (goedTelling / totaalGemaakt) * 100;
+    let feedback;
+    if (perc === 100) feedback = 'Perfect gedaan! Je bent een echte meester! 👑';
+    else if (perc >= 80) feedback = 'Super goed gewerkt! Een dikke gouden ster! 🥇';
+    else if (perc >= 60) feedback = 'Mooi resultaat! Je bent goed op weg! 🥈';
+    else feedback = 'Goed geoefend! Blijf het proberen en je wordt vanzelf beter! 🥉';
+    document.getElementById('evalFeedback').textContent = feedback;
+
+    document.getElementById('btnControleer').style.display = 'none';
+    document.getElementById('btnNaarScore').style.display = 'block';
+
+    state.werkbladAlBeoordeeld = true;
+    updateHistoryUI();
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function gaNaarEvaluatieScherm() {
+    switchView('evaluatie');
+}
+
+/* ============================================================
+   EVENT DELEGATIE
+   Eén centraal punt voor alle klik- en toetsenbordinteracties,
+   zodat er geen inline onclick-attributen of losse globale
+   functie-koppelingen nodig zijn.
+   ============================================================ */
+function handleAction(el) {
+    const action = el.dataset.action;
+    switch (action) {
+        case 'terug-naar-home': terugNaarHome(); break;
+        case 'reset-punten': resetPunten(); break;
+        case 'voeg-leerling-toe': voegLeerlingToe(); break;
+        case 'sluit-beloning': sluitBeloning(); break;
+        case 'reset-scores': resetScores(); break;
+        case 'open-info': switchView('info'); break;
+        case 'toggle-tile': toggleTile(el.dataset.cat); break;
+        case 'toggle-tafel': toggleTafelNummer(parseInt(el.dataset.tafel, 10)); break;
+        case 'set-lengte': setLengte(parseInt(el.dataset.lengte, 10)); break;
+        case 'set-bereik': setBereik(parseInt(el.dataset.bereik, 10)); break;
+        case 'set-niveau': setNiveau(el.dataset.niveau); break;
+        case 'toggle-som-paneel': toggleSomPaneel(el.dataset.panel, el); break;
+        case 'wis-som-kladblok': wisSomKladblok(parseInt(el.dataset.index, 10)); break;
+        case 'set-scratch-mode': setScratchMode(parseInt(el.dataset.index, 10), el.dataset.mode, el); break;
+        case 'genereer-werkblad': genereerWerkblad(); break;
+        case 'nakijken': nakijkenWerkblad(); break;
+        case 'naar-evaluatie': gaNaarEvaluatieScherm(); break;
+        default: break;
+    }
+}
+
+document.addEventListener('click', (event) => {
+    const el = event.target.closest('[data-action]');
+    if (el) handleAction(el);
+});
+
+
+document.addEventListener('change', (event) => {
+    if (event.target.id === 'studentSelect') wisselLeerling(event.target.value);
+});
+
+// Enter-toets in een antwoordveld: spring naar het volgende veld,
+// of controleer het werkblad als het de laatste vraag was.
+document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+    const target = event.target;
+    if (!target.matches('.som-input, .splits-input-box')) return;
+    event.preventDefault();
+    const alleVelden = Array.from(document.querySelectorAll('#worksheetContainer input'));
+    const idx = alleVelden.indexOf(target);
+    if (idx > -1 && idx < alleVelden.length - 1) {
+        alleVelden[idx + 1].focus();
+    } else {
+        nakijkenWerkblad();
+    }
+});
+
+/* ============================================================
+   OPSTARTEN
+   ============================================================ */
+function init() {
+    bouwProfielKeuze();
+    document.getElementById('xpDisplay').textContent = String(state.xp);
+    updateRewardUI();
+    setNiveau(state.niveau);
+    updateHistoryUI();
+    updateStatsUI();
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+
+</script>
+</body>
+</html>
