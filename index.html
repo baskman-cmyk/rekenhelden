@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+    <title>Smarter RekenApp - Groep 4 t/m 7</title>
+
+    <!-- iPad Portretmodus Optimalisatie -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="RekenApp">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-window">
+
+    <!-- Top Navigatiebalk -->
+    <header class="top-nav">
+        <div class="profile-area">
+            <button class="btn-home" type="button" data-action="terug-naar-home">🏠 Home</button>
+            <div class="profile-info">
+                <h1>Mijn Reken Dashboard</h1>
+                <p id="headerLevelText">Kies je niveau</p>
+            </div>
+        </div>
+        <div class="score-container">
+            <div class="student-switcher" aria-label="Kies leerling">
+                <select id="studentSelect" class="student-select" aria-label="Actieve leerling"></select>
+                <button class="student-add" type="button" data-action="voeg-leerling-toe" title="Nieuwe leerling toevoegen" aria-label="Nieuwe leerling toevoegen">+</button>
+            </div>
+            <div class="score-badge">Punten: 🏆 <span id="xpDisplay">0</span></div>
+            <button class="btn-reset-points" type="button" data-action="reset-punten">🗑️ reset punten</button>
+        </div>
+    </header>
+
+    <main>
+    <!-- VIEW 1: CONFIGURATIE & OPTIES -->
+    <section id="view-dashboard" class="view active" aria-label="Dashboard">
+
+        <h2 class="section-title">1. Kies je niveau 📚</h2>
+        <div class="config-block level-picker">
+            <div class="btn-group" id="niveauGroep">
+                <button class="btn-sub" type="button" data-action="set-niveau" data-niveau="begin4">Begin 4</button>
+                <button class="btn-sub" type="button" data-action="set-niveau" data-niveau="midden4">Midden 4</button>
+                <button class="btn-sub" type="button" data-action="set-niveau" data-niveau="begin5">Begin 5</button>
+                <button class="btn-sub" type="button" data-action="set-niveau" data-niveau="midden5">Midden 5</button>
+                <button class="btn-sub active" type="button" data-action="set-niveau" data-niveau="groep6">Groep 6</button>
+                <button class="btn-sub" type="button" data-action="set-niveau" data-niveau="groep7">Groep 7</button>
+            </div>
+            <p class="sub-text" id="niveauUitleg">Groep 6: introductie van breuken, basisprocenten, meten en rekenen tot 100.000.</p>
+        </div>
+
+        <h2 class="section-title">2. Kies je oefeningen 🎯</h2>
+        <p class="sub-text">Je ziet alleen onderdelen die bij het gekozen niveau passen:</p>
+
+        <div class="dashboard-grid" id="tileGrid" role="group" aria-label="Kies oefeningen">
+            <!-- tegels worden door JavaScript ingevuld op basis van CATEGORIES -->
+        </div>
+
+        <!-- Sub-panel: Tafel Selectie vooraf -->
+        <div class="config-block" id="tafelInlinePanel" style="display:none;">
+            <h4 id="tafelPanelTitel">Kies welke tafels mee mogen doen op het blad:</h4>
+            <div class="btn-group" id="tafelSubCheckboxes" role="group" aria-labelledby="tafelPanelTitel"></div>
+        </div>
+
+        <!-- Instelling Aantal sommen per geselecteerde oefening -->
+        <div class="config-block">
+            <fieldset>
+                <legend>3. Aantal opdrachten PER OEFENING:</legend>
+                <p class="sub-text">Kies hoeveel sommen ELK gekozen onderdeel apart krijgt:</p>
+                <div class="btn-group" id="lengteGroep">
+                    <button class="btn-sub active" type="button" data-action="set-lengte" data-lengte="10">10 sommen</button>
+                    <button class="btn-sub" type="button" data-action="set-lengte" data-lengte="15">15 sommen</button>
+                    <button class="btn-sub" type="button" data-action="set-lengte" data-lengte="20">20 sommen</button>
+                    <button class="btn-sub" type="button" data-action="set-lengte" data-lengte="50">50 sommen</button>
+                </div>
+                <p id="lengteWaarschuwing" class="sub-text" style="display:none; margin-top:10px; color:var(--warning);">Bij meer dan 100 sommen kan vooral een oudere iPad trager worden. Het maximum is daarom 200 per onderdeel.</p>
+            </fieldset>
+        </div>
+
+        <!-- Instelling Getalbereik (+/- sommen) -->
+        <div class="config-block">
+            <fieldset>
+                <legend>4. Getalbereik voor optellen en aftrekken:</legend>
+                <div class="btn-group" id="bereikGroep">
+                    <button class="btn-sub active" type="button" data-action="set-bereik" data-bereik="1000">Tot 1.000</button>
+                    <button class="btn-sub" type="button" data-action="set-bereik" data-bereik="10000">Tot 10.000</button>
+                    <button class="btn-sub" type="button" data-action="set-bereik" data-bereik="100000">Tot 100.000</button>
+                </div>
+            </fieldset>
+        </div>
+
+
+
+        <section class="motivation-panel" aria-label="Dagelijkse motivatie">
+            <div class="motivation-grid">
+                <article class="motivation-card daily-card">
+                    <div class="motivation-icon">⭐</div>
+                    <div><h3>Dagelijkse uitdaging</h3><p id="dailyChallengeText">Klaar voor 10 slimme sommen?</p></div>
+                    <button class="mini-action" type="button" data-action="start-daily">Start</button>
+                </article>
+                <article class="motivation-card">
+                    <div class="motivation-icon">🔥</div><div><h3>Streak</h3><p><strong id="streakCount">0</strong> dagen achter elkaar</p></div>
+                </article>
+                <article class="motivation-card">
+                    <div class="motivation-icon">🎖️</div><div><h3>Badges</h3><p id="badgeSummary">Nog geen badges verdiend</p></div>
+                    <button class="mini-action secondary" type="button" data-action="toggle-badges">Bekijk</button>
+                </article>
+                <article class="motivation-card">
+                    <div class="motivation-icon">🎯</div><div><h3>Slim niveau</h3><p id="adaptiveStatus">Past oefeningen aan je resultaten aan</p></div>
+                    <label class="switch-label"><input id="adaptiveToggle" type="checkbox" checked> aan</label>
+                </article>
+            </div>
+            <div id="badgesPanel" class="badges-panel" hidden></div>
+        </section>
+
+        <div class="reward-progress" aria-label="Voortgang naar beloning">
+            <div class="reward-progress-head"><span>🎁 Beloning bij 500 punten</span><span id="rewardProgressText">0 / 500</span></div>
+            <div class="reward-track"><div class="reward-fill" id="rewardProgressFill"></div></div>
+        </div>
+
+        <button class="btn-action" type="button" data-action="genereer-werkblad">Oefenblad Genereren 🚀</button>
+
+        <!-- Voortgangs & Statistieken Dashboard -->
+        <h2 class="section-title">Mijn Voortgang &amp; Medailles 📊</h2>
+        <div class="config-block progress-compact-card">
+
+            <div class="quick-stats-grid">
+                <div class="stat-mini-card">
+                    <p>Sommen Gemaakt</p>
+                    <h3 id="statTotaalSommen">0</h3>
+                </div>
+                <div class="stat-mini-card">
+                    <p>Totaal Goed</p>
+                    <h3 id="statTotaalGoed" class="stat-good">0</h3>
+                </div>
+                <div class="stat-mini-card">
+                    <p>Beste Onderdeel 🏆</p>
+                    <h3 id="statBesteOnderdeel">-</h3>
+                </div>
+                <div class="stat-mini-card">
+                    <p>Extra Oefenen ⚠️</p>
+                    <h3 id="statMinderOnderdeel">-</h3>
+                </div>
+            </div>
+
+            <!-- Tabel met Voortgangsbalk en Medailles -->
+            <table class="stats-table">
+                <caption class="visually-hidden">Voortgang per onderdeel</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Onderdeel</th>
+                        <th scope="col">Score</th>
+                        <th scope="col">Niveau</th>
+                    </tr>
+                </thead>
+                <tbody id="statsTableBody">
+                    <!-- Wordt dynamisch geladen via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="section-title">Vooruitgang per onderdeel 📈</h2>
+        <div class="config-block chart-card">
+            <p class="sub-text">De balken tonen het percentage goede antwoorden. Favorieten staan bovenaan.</p>
+            <div id="progressChart" class="progress-chart" aria-label="Grafiek met vooruitgang per onderdeel"></div>
+        </div>
+
+        <h2 class="section-title">Eerder behaalde resultaten 📈</h2>
+        <div id="historyContainer" class="history-card"></div>
+        <div class="bottom-action-row" aria-label="Dashboardacties">
+            <button class="btn-action btn-reset-scores btn-bottom-small" type="button" data-action="reset-scores">🗑️ Scores resetten</button>
+            <button class="btn-action btn-info-page btn-bottom-small" type="button" data-action="open-info">ℹ️ Info &amp; leerdoelen</button>
+        </div>
+    </section>
+
+
+    <!-- VIEW: INFORMATIE & LEERDOELEN -->
+    <section id="view-info" class="view" aria-label="Informatie en leerdoelen">
+        <div class="info-hero">
+            <h2>ℹ️ Over deze RekenApp</h2>
+            <p>Deze oefenapp ondersteunt een doorlopende rekenopbouw van Begin 4 tot en met Groep 7. De oefeningen zijn nieuw en zelf samengesteld. De app gebruikt geen gekopieerde Cito-toetsvragen of methodepagina’s.</p>
+        </div>
+
+        <div class="info-section">
+            <h3>Wat is toegevoegd?</h3>
+            <div class="info-summary-grid">
+                <div class="info-summary-card"><strong>6</strong><span>opeenvolgende niveaus</span></div>
+                <div class="info-summary-card"><strong>18</strong><span>rekenonderdelen</span></div>
+                <div class="info-summary-card"><strong>500</strong><span>punten voor een beloning</span></div>
+                <div class="info-summary-card"><strong>Eigen profiel</strong><span>per leerling op dezelfde iPad</span></div>
+            </div>
+            <table class="info-table" style="margin-top:10px;">
+                <thead><tr><th>Onderdeel</th><th>Oefeningen en opbouw</th></tr></thead>
+                <tbody>
+                    <tr><td>Getallen & bewerkingen</td><td>Getalbegrip, tafels, optellen, aftrekken, vermenigvuldigen, delen, schatten en slim rekenen.</td></tr>
+                    <tr><td>Verhoudingen</td><td>Breuken, kommagetallen, procenten, verhoudingen en schaal vanaf het passende niveau.</td></tr>
+                    <tr><td>Meten & meetkunde</td><td>Tijd, geld, maten omrekenen, omtrek, oppervlakte en inhoud.</td></tr>
+                    <tr><td>Verbanden</td><td>Grafieken, tabellen, patronen, getallenlijnen en informatie aflezen.</td></tr>
+                    <tr><td>Toepassen</td><td>Eenvoudige en meerstaps redactiesommen met niveau-afhankelijke getallen en contexten.</td></tr>
+                </tbody>
+            </table>
+            <p class="info-note">Veel opgaven worden procedureel gegenereerd. Daardoor zijn er veel meer mogelijke combinaties dan er als vaste vragen in het bestand staan.</p>
+        </div>
+
+        <div class="info-section">
+            <h3>Leerdoelen per niveau</h3>
+            <div class="level-goals">
+                <div class="level-goal"><h4>Begin 4</h4><p>Getalbegrip tot 100, optellen en aftrekken, eerste tafels, hele en halve uren, eenvoudig geld en korte contextsommen.</p></div>
+                <div class="level-goal"><h4>Midden 4</h4><p>Groter getalbereik, tafels 2 t/m 15, kwartieren en vijfminutenstappen, delen door eerlijk verdelen en eenvoudige tabellen.</p></div>
+                <div class="level-goal"><h4>Begin 5</h4><p>Rekenen tot 10.000, grotere bewerkingen, delen en vermenigvuldigen, maten, geld, patronen en één- tot tweestapsproblemen.</p></div>
+                <div class="level-goal"><h4>Midden 5</h4><p>Vlotter hoofdrekenen, schriftelijke strategieën, klokkijken en tijdsduur, meetkundige begrippen en complexere contexten.</p></div>
+                <div class="level-goal"><h4>Groep 6</h4><p>Opbouw richting referentieniveau 1F met breuken, kommagetallen, basisprocenten, verhoudingen, meten en informatieverwerking.</p></div>
+                <div class="level-goal"><h4>Groep 7</h4><p>Verdieping van 1F en voorbereiding op 1S met meerstapsproblemen, schaal, procenten, formele bewerkingen en redeneren.</p></div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h3>Aansluiting op Nederlandse kaders</h3>
+            <ul>
+                <li><strong>Cito Leerling in beeld:</strong> de app oefent binnen de vier rekendomeinen Getallen, Verhoudingen, Meten en meetkunde en Verbanden, met zowel kale als contextsommen.</li>
+                <li><strong>Geldende SLO-kerndoelen:</strong> de inhoud behandelt getallen en bewerkingen, schatten, meten, meetkunde, praktische problemen en het gebruiken van rekenstrategieën.</li>
+                <li><strong>Geactualiseerde kerndoelen:</strong> er is extra aandacht voor wiskundig redeneren, functioneel rekenen, strategiegebruik en informatie uit tabellen en grafieken.</li>
+                <li><strong>Referentieniveaus:</strong> groep 6 en 7 bouwen op naar 1F en bieden bij groep 7 onderdelen die voorbereiden op het streefniveau 1S.</li>
+            </ul>
+            <p class="info-note">De app is inhoudelijk afgestemd op openbare leerdoelen en domeinen. Zij is geen officieel Cito-product, geen vervanging voor onderwijs of toetsing en is niet door Cito of SLO gecertificeerd.</p>
+        </div>
+
+        <div class="info-section">
+            <h3>Voortgang, punten en privacy</h3>
+            <p>Iedere leerling op dezelfde iPad kan een eigen profiel gebruiken. Punten, voortgang en geschiedenis worden alleen lokaal in de browser van die iPad opgeslagen. Op een andere iPad ontstaat daarom een aparte voortgang; er vindt geen automatische synchronisatie plaats.</p>
+            <ul>
+                <li>De puntenreset wist alleen de punten en de voortgang naar de beloning.</li>
+                <li>De volledige scorereset wist statistieken, medailles en geschiedenis van de actieve leerling.</li>
+                <li>Bij 500 punten verschijnt de afgesproken beloningsmelding.</li>
+            </ul>
+        </div>
+
+        <button class="btn-action" type="button" data-action="terug-naar-home">← Terug naar het dashboard</button>
+    </section>
+
+    <!-- VIEW 2: HET DIGITALE WERKBLAD -->
+    <section id="view-werkblad" class="view" aria-label="Werkblad">
+        <h2 class="section-title">Mijn Oefenblad 📝</h2>
+        <p class="sub-text">Alle onderdelen staan netjes gesorteerd onder elkaar. Succes!</p>
+
+        <div id="worksheetContainer">
+            <!-- Gecategoriseerde sommen worden hier dynamisch ingeladen -->
+        </div>
+
+        <button class="btn-action" id="btnControleer" type="button" style="margin-top: 30px;" data-action="nakijken">Werkblad Controleren ✔️</button>
+        <button class="btn-action btn-alert" id="btnNaarScore" type="button" style="margin-top: 10px; display: none;" data-action="naar-evaluatie">Bekijk Mijn Score 📊</button>
+    </section>
+
+    <!-- VIEW 3: RESULTAAT EVALUATIE -->
+    <section id="view-evaluatie" class="view" aria-label="Resultaat">
+        <h2 class="section-title">Mooi werk! 🌟</h2>
+        <div class="eval-card">
+            <p class="eval-score" id="evalScore">0 / 0</p>
+            <p class="eval-feedback" id="evalFeedback">Goed gedaan!</p>
+            <p class="eval-points" id="evalPoints">+0 Punten toegevoegd!</p>
+            <button class="btn-action" type="button" data-action="terug-naar-home">Nieuw Oefenblad Maken 🏠</button>
+        </div>
+    </section>
+    </main>
+
+</div>
+
+
+<div class="reward-modal" id="rewardModal" role="dialog" aria-modal="true" aria-labelledby="rewardTitle">
+    <div class="reward-card">
+        <div class="reward-icon">🎉🏆</div>
+        <h2 id="rewardTitle">500 punten gehaald!</h2>
+        <p>Geweldig gewerkt! Je hebt de rekenbeloning verdiend. Tijd voor de beloning die jullie samen hebben afgesproken.</p>
+        <button class="btn-action" type="button" data-action="sluit-beloning">Super!</button>
+    </div>
+</div>
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script src="enhancements.js"></script>
+</body>
+</html>
