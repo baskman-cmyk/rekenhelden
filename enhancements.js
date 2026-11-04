@@ -17,7 +17,18 @@ window.bouwTegels=function(){
 function toggleFavorite(cat){favorites=favorites.includes(cat)?favorites.filter(x=>x!==cat):[...favorites,cat];saveFavorites();bouwTegels();renderChart()}
 function chooseDaily(){const allowed=LEVELS[state.niveau].categories;const candidates=allowed.map(k=>({k,d:state.progress[k]||{totaal:0,goed:0}}));candidates.sort((a,b)=>{const ap=a.d.totaal? a.d.goed/a.d.totaal:-1;const bp=b.d.totaal? b.d.goed/b.d.totaal:-1;return ap-bp});return candidates[0]?.k||allowed[0]}
 function startDaily(){const cat=chooseDaily();state.selectedCategories=[cat];state.sommenPerOefening=ENHANCEMENT_CONFIG.dailyCount;dailyMode=true;bouwTegels();setLengte(10);genereerWerkblad()}
-function applyAdaptive(){if(!adaptive||!state.selectedCategories.length)return;let t=0,g=0;state.selectedCategories.forEach(k=>{const d=state.progress[k]||{};t+=d.totaal||0;g+=d.goed||0});if(t<10){document.getElementById('adaptiveStatus').textContent='Nog even leren kennen';return}const p=g/t;const max=LEVELS[state.niveau].maxGetal;if(p>=.85){state.getalbereik=max;document.getElementById('adaptiveStatus').textContent='Moeilijker: je scoort sterk'}else if(p<.6){state.getalbereik=Math.min(max,state.niveau.includes('4')?100:1000);document.getElementById('adaptiveStatus').textContent='Rustiger: extra basis oefenen'}else{state.getalbereik=Math.min(max,10000);document.getElementById('adaptiveStatus').textContent='Passend bij je huidige score'}setBereik(state.getalbereik)}
+function applyAdaptive(){
+ if(!adaptive||!state.selectedCategories.includes('optellen_aftrekken'))return;
+ const d=state.progress.optellen_aftrekken||{};
+ if((d.totaal||0)<10){document.getElementById('adaptiveStatus').textContent='Nog even leren kennen';return;}
+ const p=d.goed/d.totaal,max=LEVELS[state.niveau].maxGetal;
+ const grenzen=[100,1000,10000,100000,1000000].filter(n=>n<=max);
+ const huidig=Math.max(0,grenzen.findIndex(n=>n>=state.getalbereik));
+ const stap=p<0.6?-1:p>=0.85?1:0;
+ const passend=grenzen[Math.max(0,Math.min(grenzen.length-1,huidig+stap))];
+ setBereik(passend);
+ document.getElementById('adaptiveStatus').textContent=stap<0?'Kleinere getallen binnen dit leerjaar':stap>0?'Een stap verder binnen dit leerjaar':'Verder oefenen op dit getalbereik';
+}
 const oldGenerate=genereerWerkblad;window.genereerWerkblad=function(){applyAdaptive();return oldGenerate()};
 function updateStreak(){const t=today();let s=get('streak',{count:0,last:null});if(s.last===t)return s;if(s.last&&yesterdayDate(t)===s.last)s.count=(s.count||0)+1;else s.count=1;s.last=t;set('streak',s);return s}
 function confetti(){if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;const chars=['🎉','⭐','✨','🎊'];for(let i=0;i<42;i++){const e=document.createElement('span');e.className='confetti-piece';e.textContent=chars[i%chars.length];e.style.left=`${Math.random()*100}vw`;e.style.setProperty('--drift',`${Math.round(Math.random()*180-90)}px`);e.style.animationDelay=`${Math.random()*.45}s`;document.body.appendChild(e);setTimeout(()=>e.remove(),3000)}}

@@ -22,14 +22,38 @@ const CONFIG = {
     tafelBereik: { min: 1, max: 20 }
 };
 
+// Begin = leren richting de middentoets; Midden = leren richting de eindtoets.
+const TAFELS_BASIS = [1,2,3,4,5,6,7,8,9,10];
+const BASIS4 = ['getalbegrip','tafels','optellen_aftrekken','klokkijken','geld','strategie','redactie'];
+const BASIS5 = [...BASIS4,'vermenigvuldigen','delen','meten','informatie'];
+const BASIS6 = [...BASIS5,'breuken','breukencontext','kommagetallen','meetkunde','schatten'];
+const BASIS7 = [...BASIS6,'procenten','verhoudingen'];
 const LEVELS = {
-    begin4: { label:'Begin 4', uitleg:'Begin 4: rustig opbouwen met getallen tot 100, eenvoudige splitsingen, optellen en aftrekken, de eerste tafels, hele en halve uren en herkenbaar geld.', maxGetal:100, tafels:[2,3,4,5,10], factoren:[2,3,4,5,10], categories:['getalbegrip','tafels','optellen_aftrekken','klokkijken','geld','strategie','redactie'] },
-    midden4:{ label:'Midden 4', uitleg:'Midden 4: rekenen tot 1.000, tafels automatiseren tot en met 15, eenvoudige keer- en deelsommen, kloktijden, geld en informatie aflezen.', maxGetal:1000, tafels:[2,3,4,5,6,7,8,9,10,11,12,13,14,15], factoren:[2,3,4,5,6,7,8,9,10], categories:['getalbegrip','tafels','optellen_aftrekken','vermenigvuldigen','delen','klokkijken','geld','informatie','strategie','redactie'] },
-    begin5:{ label:'Begin 5', uitleg:'Begin 5: rekenen tot 10.000, grotere bewerkingen, delen, tijd, geld, maten, tabellen en handige rekenstrategieën.', maxGetal:10000, tafels:[2,3,4,5,6,7,8,9,10], factoren:[2,3,4,5,6,7,8,9,10], categories:['getalbegrip','tafels','optellen_aftrekken','vermenigvuldigen','delen','klokkijken','geld','meten','informatie','strategie','redactie'] },
-    midden5:{ label:'Midden 5', uitleg:'Midden 5: rekenen tot 100.000, tafels tot 15, meten, meetkunde, schatten, grafieken, patronen en slim rekenen.', maxGetal:100000, tafels:[2,3,4,5,6,7,8,9,10,11,12,13,14,15], factoren:[3,4,5,6,7,8,9,10,11,12], categories:['getalbegrip','tafels','optellen_aftrekken','vermenigvuldigen','delen','klokkijken','geld','meten','meetkunde','schatten','informatie','strategie','redactie'] },
-    groep6:{ label:'Groep 6', uitleg:'Groep 6: breuken, kommagetallen, basisprocenten, verhoudingen, meten, data lezen en rekenen tot 100.000.', maxGetal:100000, tafels:[2,3,4,5,6,7,8,9,10,11,12,13,14,15], factoren:[3,4,5,6,7,8,9,11,12], categories:['getalbegrip','tafels','optellen_aftrekken','vermenigvuldigen','delen','breuken','breukencontext','kommagetallen','procenten','verhoudingen','meten','meetkunde','schatten','informatie','strategie','redactie'] },
-    groep7:{ label:'Groep 7', uitleg:'Groep 7: grotere getallen, breuken, percentages, schaal, data, flexibel rekenen en meerstapsproblemen.', maxGetal:1000000, tafels:[2,3,4,5,6,7,8,9,10,11,12,13,14,15], factoren:[3,4,5,6,7,8,9,11,12], categories:['getalbegrip','tafels','optellen_aftrekken','vermenigvuldigen','delen','breuken','breukencontext','kommagetallen','procenten','verhoudingen','meten','meetkunde','schatten','informatie','strategie','redactie'] }
+    begin4:{label:'Begin 4',uitleg:'Tot de middentoets van groep 4: rekenen tot 100, alle tafels 1–10, hele en halve uren. Selecteer eventueel eerst een paar tafels.',maxGetal:100,tafels:TAFELS_BASIS,factoren:TAFELS_BASIS,categories:BASIS4},
+    midden4:{label:'Midden 4',uitleg:'Van midden naar eind groep 4: rekenen tot 100, tafels 1–10 automatiseren, eenvoudige deelsommen, kwartieren en vijf minuten.',maxGetal:100,tafels:TAFELS_BASIS,factoren:TAFELS_BASIS,categories:[...BASIS4,'vermenigvuldigen','delen','informatie']},
+    begin5:{label:'Begin 5',uitleg:'Tot de middentoets van groep 5: getallen tot 1.000, rustig opbouwen met tientallen, eenvoudige keersommen, delen en maten herkennen.',maxGetal:1000,tafels:TAFELS_BASIS,factoren:TAFELS_BASIS,categories:BASIS5},
+    midden5:{label:'Midden 5',uitleg:'Van midden naar eind groep 5: rekenen tot 1.000, tweecijferig × één cijfer, delen met één cijfer, eenvoudige maten en omtrek.',maxGetal:1000,tafels:TAFELS_BASIS,factoren:TAFELS_BASIS,categories:[...BASIS5,'meetkunde','schatten']},
+    groep6:{label:'Begin 6',uitleg:'Tot de middentoets van groep 6: rekenen tot 10.000, bijvoorbeeld 24 × 6 en 144 : 8, halven en kwarten, kennismaken met kommagetallen, maten en klokkijken.',maxGetal:10000,tafels:TAFELS_BASIS,factoren:TAFELS_BASIS,categories:BASIS6},
+    midden6:{label:'Midden 6',uitleg:'Van midden naar eind groep 6: grotere getallen, bijvoorbeeld 34 × 26 en 936 : 24, breuken vergelijken en berekenen, kommagetallen +/−, maten omrekenen en tijdsduur.',maxGetal:100000,tafels:TAFELS_BASIS,factoren:TAFELS_BASIS,categories:BASIS6},
+    groep7:{label:'Begin 7',uitleg:'Tot de middentoets van groep 7: verder met grote getallen, breuken en kommagetallen, eenvoudige procenten en verhoudingen, oppervlakte en inhoud.',maxGetal:100000,tafels:TAFELS_BASIS,factoren:TAFELS_BASIS,categories:BASIS7},
+    midden7:{label:'Midden 7',uitleg:'Van midden naar eind groep 7: getallen tot 1.000.000, grotere bewerkingen, delen met rest, breuken, percentages, schaal en meerstapsproblemen.',maxGetal:1000000,tafels:TAFELS_BASIS,factoren:TAFELS_BASIS,categories:BASIS7}
 };
+const LEERLIJN = {
+    begin4:{plusMax:100,mul:[2,10,2,10],div:[2,10,2,10,100],commaDigits:0},
+    midden4:{plusMax:100,mul:[2,10,2,10],div:[2,10,2,10,100],commaDigits:0},
+    begin5:{plusMax:1000,mul:[12,24,2,5],div:[2,5,2,12,60],commaDigits:0},
+    midden5:{plusMax:1000,mul:[12,49,2,9],div:[2,9,2,20,180],commaDigits:0},
+    groep6:{plusMax:10000,mul:[12,99,2,9],div:[2,9,2,50,450],commaDigits:1},
+    midden6:{plusMax:100000,mul:[12,99,11,49],div:[12,24,12,40,960],commaDigits:2},
+    groep7:{plusMax:100000,mul:[12,99,11,99],div:[12,49,12,99,5000],commaDigits:2},
+    midden7:{plusMax:1000000,mul:[101,999,11,99],div:[12,99,12,199,20000],commaDigits:3}
+};
+function leerprofiel(instellingen={}){return LEERLIJN[instellingen.niveau]||LEERLIJN[CONFIG.defaultNiveau];}
+function getalgrens(instellingen={}){
+    const max=leerprofiel(instellingen).plusMax;
+    return Math.max(20,Math.min(max,Number(instellingen.getalbereik)||max));
+}
+function rekenGetal(min,max,stap=1){return randInt(Math.ceil(min/stap),Math.floor(max/stap))*stap;}
 
 /* ============================================================
    HULPFUNCTIES (klein en puur, makkelijk te testen)
@@ -92,11 +116,11 @@ function maakSplitsSom(totaal, links, rechts, antwoordNum, strategie = 'getalbeg
 function genTafels(instellingen) {
     const profiel = LEVELS[instellingen.niveau] || LEVELS.groep6;
     const tafels = (instellingen.selectedTafels && instellingen.selectedTafels.length)
-        ? instellingen.selectedTafels.filter(t => profiel.tafels.includes(t) && t !== 1)
-        : profiel.tafels.filter(t => t !== 1);
-    const bruikbareTafels = tafels.length ? tafels : profiel.tafels.filter(t => t !== 1);
+        ? instellingen.selectedTafels.filter(t => profiel.tafels.includes(t))
+        : profiel.tafels;
+    const bruikbareTafels = tafels.length ? tafels : profiel.tafels;
     const t = pickRandom(bruikbareTafels);
-    const factoren = profiel.factoren.filter(f => f !== 1);
+    const factoren = profiel.factoren;
     const m = pickRandom(factoren);
     const klein = Math.min(m, t), groot = Math.max(m, t);
     return maakSom(`${m} × ${t} =`, m * t, 'tafels', { signature: `mul:${klein}x${groot}` });
@@ -123,50 +147,69 @@ function genSchattenVermenigvuldigen() {
     return maakSom(`Hoeveel is het ongeveer? (Rond af op tientallen):\n ${g1} × ${g2} ≈`, antwoord);
 }
 
-function genSchatten() {
-    const varianten = [genSchattenOptellen, genSchattenAftrekken, genSchattenVermenigvuldigen];
-    return pickRandom(varianten)();
+function genSchatten(instellingen={}){
+    const max=getalgrens(instellingen),stap=max<=1000?10:100;
+    const a=randInt(stap,Math.floor(max*0.6)),b=randInt(stap,Math.floor(max*0.3));
+    return maakSom(`Rond beide getallen af op ${stap===10?'tientallen':'honderdtallen'} en tel de afgeronde getallen op: ${a} + ${b} ≈`,Math.round(a/stap)*stap+Math.round(b/stap)*stap,'schatten');
 }
 
 function genSplitsen(instellingen) {
-    const niveau = instellingen.niveau || CONFIG.defaultNiveau;
-    if (niveau === 'begin4' || niveau === 'midden4') {
-        const max = niveau === 'begin4' ? 30 : 100;
-        const totaal = randInt(10, max);
-        const links = randInt(2, totaal - 2);
-        const rechts = totaal - links;
-        const linksOnbekend = Math.random() > 0.5;
-        return maakSplitsSom(totaal, linksOnbekend ? '?' : links, linksOnbekend ? rechts : '?', linksOnbekend ? links : rechts, 'getalbegrip');
+    const niveau=instellingen.niveau||CONFIG.defaultNiveau;
+    if(niveau==='begin4'||niveau==='midden4'){
+        const totaal=randInt(10,niveau==='begin4'?20:100), links=randInt(1,totaal-1), rechts=totaal-links;
+        const linksOnbekend=Math.random()<0.5;
+        return maakSplitsSom(totaal,linksOnbekend?'?':links,linksOnbekend?rechts:'?',linksOnbekend?links:rechts,'getalbegrip');
     }
-    const max = LEVELS[niveau]?.maxGetal || 100000;
-    const variant = randInt(0, 2);
-    if (variant === 0) {
-        const n = randInt(1000, max);
-        const duizendtallen = Math.floor(n / 1000) * 1000;
-        const rest = n - duizendtallen;
-        return maakSom(`${n} = ${duizendtallen} + ...`, rest, 'getalbegrip');
+    const max=getalgrens(instellingen), n=randInt(max>=1000?101:10,max);
+    const plaats=10**randInt(1,String(n).length-1);
+    if(Math.random()<0.5){
+        const groot=Math.floor(n/plaats)*plaats;
+        return maakSom(`${n} = ${groot} + ...`,n-groot,'getalbegrip');
     }
-    if (variant === 1) {
-        const tientallen = randInt(12, 98);
-        const factor = pickRandom([3,4,5,6,7,8,9]);
-        const tientalDeel = Math.floor(tientallen / 10) * 10;
-        return maakSom(`${tientallen} × ${factor} = ${tientalDeel} × ${factor} + ...`, (tientallen - tientalDeel) * factor, 'getalbegrip');
-    }
-    const deler = pickRandom([3,4,5,6,8,9]);
-    // Kies een handig honderdtal dat zonder rest door de deler kan.
-    // Ook het tweede deel blijft kleiner dan 100 en is exact deelbaar.
-    const handigeHonderdtallen = [200,300,400,500,600,700,800,900].filter(getal => getal % deler === 0);
-    const honderdtal = pickRandom(handigeHonderdtallen);
-    const maxFactor = Math.max(2, Math.floor(99 / deler));
-    const rest = deler * randInt(2, maxFactor);
-    return maakSom(`${honderdtal + rest} : ${deler} = ${honderdtal} : ${deler} + ...`, rest / deler, 'getalbegrip');
+    const cijfer=Math.floor(n/plaats)%10;
+    const namen={10:'tientallen',100:'honderdtallen',1000:'duizendtallen',10000:'tienduizendtallen',100000:'honderdduizendtallen'};
+    return maakSom(`Welk cijfer staat op de plaats van de ${namen[plaats]} in ${n}?`,cijfer,'getalbegrip');
 }
 
 const POOL_BREUKEN_HELFT_VAN = [12, 16, 20, 24, 32, 36, 40, 44, 48];
 const POOL_BREUKEN_TELLER = [6, 8, 10, 12, 14, 16, 18, 20];
 
-function genBreuken() {
-    const subB = randInt(0, 3);
+function breukenStrook(teller,noemer){
+    const vakken=Array.from({length:noemer},(_,i)=>`<rect x="${i*360/noemer}" y="8" width="${360/noemer}" height="48" fill="${i<teller?'#4f70df':'#edf0fa'}" stroke="#27365a"/>`).join('');
+    return `<svg viewBox="0 0 360 64" style="display:block;width:100%;max-width:360px;margin:12px auto" role="img" aria-label="Breukenstrook met gekleurde en lege vakken">${vakken}</svg>`;
+}
+function genBreuken(instellingen={}){
+    const niveau=instellingen.niveau||CONFIG.defaultNiveau;
+    if(niveau==='groep7'||niveau==='midden7')return genBreukenGevorderd(instellingen);
+    if(niveau==='groep6'){
+        const noemer=pickRandom([2,4]), variant=randInt(0,2);
+        if(variant===0){
+            const delen=noemer*randInt(1,5);
+            return maakSom('Welk deel is gekleurd? Typ 1/2 of 1/4.',`1/${noemer}`,'breuken',{customHTML:breukenStrook(delen/noemer,delen),signature:`strook:${delen/noemer}:${delen}`});
+        }
+        if(variant===1){
+            const totaal=noemer*randInt(2,12);
+            return maakSom(`Wat is 1/${noemer} van ${totaal}?`,totaal/noemer,'breuken');
+        }
+        const totaal=noemer*randInt(2,10),deel=totaal/noemer;
+        return maakSom(`Je verdeelt ${totaal} blokjes in ${noemer} gelijke groepjes. Welk deel is één groepje van ${deel} blokjes? Typ een breuk.`,`1/${noemer}`,'breuken');
+    }
+    const variant=randInt(0,2),noemer=pickRandom([2,3,4,5,8,10]);
+    if(variant===0){
+        const [n1,n2]=Math.random()<0.5?[noemer,noemer]:pickRandom([[2,4],[2,8],[4,8],[3,6],[5,10]]);
+        const a=randInt(1,n1-1),b=randInt(1,n2-1),links=a*n2,rechts=b*n1;
+        return maakSom(`Vul <, > of = in: ${a}/${n1} ... ${b}/${n2}`,links<rechts?'<':links>rechts?'>':'=','breuken');
+    }
+    if(variant===1){
+        const teller=randInt(1,noemer-1),hoeveelheid=noemer*randInt(2,15);
+        return maakSom(`Wat is ${teller}/${noemer} van ${hoeveelheid}?`,teller*hoeveelheid/noemer,'breuken');
+    }
+    const a=randInt(1,noemer-1),b=randInt(1,noemer-a);
+    return maakSom(`${a}/${noemer} + ${b}/${noemer} = ... (typ een breuk)`,`${a+b}/${noemer}`,'breuken');
+}
+
+function genBreukenGevorderd(instellingen) {
+    const subB = randInt(0, instellingen.niveau==='midden7'?3:2);
     if (subB === 0) {
         const nr = pickRandom(POOL_BREUKEN_HELFT_VAN);
         return maakSom(`Wat is 3/4 van ${nr}?`, (nr / 4) * 3);
@@ -226,11 +269,12 @@ const POOL_BREUKEN_CONTEXT = [
     { n: 1, v: 'Voor een groot feest zijn [X] ballonnen opgeblazen. 1/[Y] deel knapt helaas voortijdig. Hoeveel ballonnen knappen er?', f: (x, y) => x / y }
 ];
 
-function genBreukenContext() {
-    const item = pickRandom(POOL_BREUKEN_CONTEXT);
+function genBreukenContext(instellingen={}) {
+    const basis=instellingen.niveau==='groep6';
+    const item = pickRandom(basis?POOL_BREUKEN_CONTEXT.filter(x=>x.n===1):POOL_BREUKEN_CONTEXT);
     // y moet groter zijn dan de teller uit het sjabloon, anders ontstaat er
     // een onechte breuk (bijv. "5/2 deel"), wat pedagogisch onzin is.
-    const yOpties = [2, 3, 4, 5, 6, 7, 8, 9, 10, 12].filter(y => y > item.n);
+    const yOpties = (basis?[2,4]:[2,3,4,5,6,8,10,12]).filter(y => y > item.n);
     const y = pickRandom(yOpties);
     const factor = randInt(3, 14);
     const x = y * factor;
@@ -239,48 +283,39 @@ function genBreukenContext() {
 }
 
 function genOptellenAftrekken(instellingen) {
-    const niveau = instellingen.niveau || CONFIG.defaultNiveau;
-    const max = LEVELS[niveau]?.maxGetal || instellingen.getalbereik || 1000;
-    const min = niveau === 'begin4' ? 5 : niveau === 'midden4' ? 20 : 100;
-    const a = randInt(min, Math.max(min + 5, Math.floor(max * 0.7)));
-    const b = randInt(2, Math.max(3, Math.min(a, Math.floor(max * 0.3))));
-    if (Math.random() > 0.5) return maakSom(`${a} + ${b} =`, a + b, 'optellen_aftrekken');
-    return maakSom(`${a + b} - ${b} =`, a, 'optellen_aftrekken');
+    const niveau=instellingen.niveau||CONFIG.defaultNiveau,max=getalgrens(instellingen);
+    // Mix herhaling, ronde getallen en sommen met meer overgangen.
+    const variant=randInt(0,3);
+    const werkMax=variant===0?Math.max(20,Math.floor(max/10)):max;
+    const stap=variant===1&&werkMax>=1000?10:variant===2&&werkMax>=10000?100:1;
+    const a=rekenGetal(stap,Math.floor(werkMax*0.65),stap);
+    const b=rekenGetal(stap,Math.max(stap,Math.min(a,werkMax-a)),stap);
+    const plus=Math.random()<0.5;
+    if(!plus&&variant===2&&max>=1000){
+        const rond=max>=10000?1000:100,minuend=randInt(2,Math.floor(max/rond))*rond;
+        const aftrekker=randInt(1,minuend-1);
+        return maakSom(`${minuend} - ${aftrekker} =`,minuend-aftrekker,'optellen_aftrekken');
+    }
+    return maakSom(plus?`${a} + ${b} =`:`${a+b} - ${b} =`,plus?a+b:a,'optellen_aftrekken');
 }
 
 function genVermenigvuldigen(instellingen) {
-    const niveau = instellingen.niveau || CONFIG.defaultNiveau;
-    let a, b;
-    if (niveau === 'midden4') { a=randInt(2,15); b=randInt(2,10); }
-    else if (niveau === 'begin5') { a=randInt(11,49); b=randInt(2,9); }
-    else if (niveau === 'midden5') { a=randInt(12,99); b=randInt(2,12); }
-    else {
-        const variant = randInt(0, niveau === 'groep6' ? 2 : 3);
-        if (variant === 0) { a=randInt(11,99); b=randInt(3,12); }
-        else if (variant === 1) { a=pickRandom([14,25,35,45,60,75,125,205,230,320]); b=randInt(3,12); }
-        else if (variant === 2) { a=randInt(101,999); b=randInt(3,9); }
-        else { a=randInt(12,49); b=randInt(11,29); }
-    }
-    const klein=Math.min(a,b), groot=Math.max(a,b);
-    return maakSom(`${a} × ${b} =`, a*b, 'vermenigvuldigen', {signature:`mul:${klein}x${groot}`});
+    const niveau=instellingen.niveau||CONFIG.defaultNiveau;
+    let [amin,amax,bmin,bmax]=leerprofiel(instellingen).mul;
+    // Ook in de tweede jaarhelft blijven bekende ééncijferige factoren terugkomen.
+    if(['midden6','groep7','midden7'].includes(niveau)&&Math.random()<0.3){amin=12;amax=niveau==='midden7'?499:99;bmin=2;bmax=9;}
+    const a=randInt(amin,amax),b=randInt(bmin,bmax);
+    return maakSom(`${a} × ${b} =`,a*b,'vermenigvuldigen',{signature:`mul:${Math.min(a,b)}x${Math.max(a,b)}`});
 }
 
 function genDelen(instellingen) {
-    const niveau = instellingen.niveau || CONFIG.defaultNiveau;
-    let deler, quotient, rest=0;
-    if (niveau === 'midden4') { deler=randInt(2,10); quotient=randInt(2,10); }
-    else if (niveau === 'begin5') { deler=randInt(2,10); quotient=randInt(5,25); }
-    else if (niveau === 'midden5') { deler=randInt(2,12); quotient=randInt(6,45); }
-    else {
-        const variant=randInt(0,niveau==='groep6'?2:3);
-        if(variant===0){deler=randInt(3,12); quotient=randInt(8,80);}
-        else if(variant===1){deler=pickRandom([20,25,30,40,50]); quotient=randInt(3,40);}
-        else if(variant===2){deler=pickRandom([3,4,5,6,8,9]); quotient=randInt(20,180);}
-        else {deler=randInt(4,15); quotient=randInt(8,40); rest=randInt(1,deler-1);}
-    }
+    const niveau=instellingen.niveau||CONFIG.defaultNiveau;
+    let [dmin,dmax,qmin,qmax,max]=leerprofiel(instellingen).div;
+    if(['midden6','groep7'].includes(niveau)&&Math.random()<0.3){dmin=2;dmax=9;qmin=12;qmax=50;}
+    const deler=randInt(dmin,dmax),quotient=randInt(qmin,Math.min(qmax,Math.floor(max/deler)));
+    const rest=niveau==='midden7'&&Math.random()<0.25?randInt(1,deler-1):0;
     const deeltal=deler*quotient+rest;
-    if(rest) return maakSom(`${deeltal} : ${deler} = ... rest ...`, `${quotient} rest ${rest}`, 'delen', {signature:`div:${deeltal}:${deler}`});
-    return maakSom(`${deeltal} : ${deler} =`, quotient, 'delen', {signature:`div:${deeltal}:${deler}`});
+    return maakSom(`${deeltal} : ${deler} =${rest?' ... rest ...':''}`,rest?`${quotient} rest ${rest}`:quotient,'delen',{signature:`div:${deeltal}:${deler}`});
 }
 
 /* REDACTIE_DATASET
@@ -334,10 +369,25 @@ const REDACTIE_LAAG = [
 
 function genRedactie(instellingen) {
     const niveau = instellingen?.niveau || CONFIG.defaultNiveau;
-    if (['begin4','midden4','begin5','midden5'].includes(niveau)) {
-        const item = pickRandom(REDACTIE_LAAG);
-        const [x,y] = item.gen(niveau);
-        return maakSom(item.v.replace('[X]',x).replace('[Y]',y), item.f(x,y), 'redactie');
+    if (['begin4','midden4','begin5','midden5','groep6'].includes(niveau)) {
+        const profiel=leerprofiel(instellingen),max=getalgrens(instellingen),variant=randInt(0,5);
+        if(variant===0||variant===1){
+            const limiet=niveau==='groep6'?Math.min(max,5000):niveau.includes('4')?100:1000;
+            const stap=niveau==='groep6'?5:1;
+            const a=rekenGetal(stap,Math.floor(limiet*0.6),stap),b=rekenGetal(stap,Math.floor(limiet*0.35),stap);
+            if(variant===0)return maakSom(`De bibliotheek heeft ${a} boeken. Er komen ${b} boeken bij. Hoeveel boeken zijn er nu?`,a+b,'redactie');
+            return maakSom(`Een winkel heeft ${a+b} potloden. Er worden ${b} verkocht. Hoeveel potloden blijven er over?`,a,'redactie');
+        }
+        if(variant===2||variant===3){
+            const maxGroepen=niveau.includes('4')?10:niveau==='groep6'?24:12;
+            const groepen=randInt(2,maxGroepen),perGroep=randInt(2,niveau==='begin5'?5:9);
+            if(variant===2)return maakSom(`Er zijn ${groepen} dozen met elk ${perGroep} appels. Hoeveel appels zijn dat samen?`,groepen*perGroep,'redactie');
+            return maakSom(`${groepen*perGroep} potloden worden eerlijk verdeeld over ${perGroep} kinderen. Hoeveel potloden krijgt ieder kind?`,groepen,'redactie');
+        }
+        const gelezen=randInt(5,niveau.includes('4')?30:120),over=randInt(5,niveau.includes('4')?50:180);
+        if(variant===4)return maakSom(`Een boek heeft ${gelezen+over} bladzijden. Noor heeft er ${gelezen} gelezen. Hoeveel bladzijden moet ze nog lezen?`,over,'redactie');
+        const km1=randInt(3,25),km2=randInt(3,25);
+        return maakSom(`Je fietst 's ochtends ${km1} kilometer en 's middags ${km2} kilometer. Hoeveel kilometer fiets je samen?`,km1+km2,'redactie');
     }
     if (randInt(1, 100) <= 45) {
         const dozen = randInt(3, 12), perDoos = randInt(6, 24), verkocht = randInt(5, Math.max(6, dozen * perDoos - 10));
@@ -356,28 +406,26 @@ function genRedactie(instellingen) {
 }
 
 function genKommagetallen(instellingen) {
-    const niveau = instellingen.niveau || CONFIG.defaultNiveau;
-    const variant = randInt(0, 3);
-    const a = randInt(10, 999) / 10;
-    const b = randInt(10, 499) / 10;
-    if (variant === 0) return maakSom(`${a.toFixed(1)} + ${b.toFixed(1)} =`, (a+b).toFixed(1));
-    if (variant === 1) {
-        const groot = Math.max(a,b), klein = Math.min(a,b);
-        return maakSom(`${groot.toFixed(1)} - ${klein.toFixed(1)} =`, (groot-klein).toFixed(1));
+    const niveau=instellingen.niveau||CONFIG.defaultNiveau;
+    const digits=leerprofiel(instellingen).commaDigits||1,scale=10**digits;
+    const schrijf=n=>n.toFixed(digits).replace('.',',');
+    if(niveau==='groep6'){
+        const heel=randInt(0,9),tienden=randInt(1,9);
+        if(Math.random()<0.5)return maakSom(`${heel} hele en ${tienden} tienden is welk kommagetal?`,schrijf(heel+tienden/10),'kommagetallen');
+        return maakSom(`Hoeveel tienden staan er achter de komma in ${heel},${tienden}?`,tienden,'kommagetallen');
     }
-    if (variant === 2) {
-        const n = randInt(12, 999) / 10;
-        const f = pickRandom([3,4,5,6,8]);
-        return maakSom(`${n.toFixed(1)} × ${f} =`, (n*f).toFixed(1));
-    }
-    const f = pickRandom([2,4,5,8,10]);
-    const q = randInt(3, niveau === 'groep6' ? 30 : 80) / 10;
-    return maakSom(`${(q*f).toFixed(1)} : ${f} =`, q.toFixed(1));
+    const a=randInt(10,1999)/scale,b=randInt(10,999)/scale;
+    const variant=randInt(0,niveau==='midden6'?1:3);
+    if(variant===0)return maakSom(`${schrijf(a)} + ${schrijf(b)} =`,schrijf(a+b),'kommagetallen');
+    if(variant===1)return maakSom(`${schrijf(Math.max(a,b))} - ${schrijf(Math.min(a,b))} =`,schrijf(Math.abs(a-b)),'kommagetallen');
+    const factor=pickRandom([2,4,5,10]);
+    if(variant===2)return maakSom(`${schrijf(a)} × ${factor} =`,schrijf(a*factor),'kommagetallen');
+    return maakSom(`${schrijf(a*factor)} : ${factor} =`,schrijf(a),'kommagetallen');
 }
 
 function genProcenten(instellingen) {
     const niveau = instellingen.niveau || CONFIG.defaultNiveau;
-    const percentages = niveau === 'groep6' ? [10,25,50,75] : [1,5,10,20,25,50,75];
+    const percentages = niveau !== 'midden7' ? [10,25,50] : [1,5,10,20,25,50,75];
     const p = pickRandom(percentages);
     const basis = pickRandom([40,60,80,100,120,160,200,240,300,400,500]);
     if (randInt(0,1) === 0) return maakSom(`${p}% van ${basis} =`, basis*p/100);
@@ -387,8 +435,8 @@ function genProcenten(instellingen) {
 
 function genVerhoudingen(instellingen) {
     const niveau = instellingen.niveau || CONFIG.defaultNiveau;
-    const variant = randInt(0, 5);
-    const factor = randInt(2, niveau === 'groep6' ? 6 : 12);
+    const variant = pickRandom(niveau==='midden7'?[0,1,2,3,4,5]:[0,2,4]);
+    const factor = randInt(2, niveau==='midden7'?12:5);
     if (variant === 0) {
         const personen = randInt(2, 8), perGroep = randInt(2, 9);
         return maakSom(`Voor ${personen} personen zijn ${personen * perGroep} broodjes nodig. Hoeveel broodjes zijn nodig voor ${personen * factor} personen?`, personen * perGroep * factor);
@@ -415,18 +463,33 @@ function genVerhoudingen(instellingen) {
 }
 
 function genMeten(instellingen) {
-    const variant = randInt(0,4);
-    if (variant===0) { const m=randInt(3,40); return maakSom(`${m} meter = ... centimeter`, m*100); }
-    if (variant===1) { const kg=randInt(2,25); return maakSom(`${kg} kilogram = ... gram`, kg*1000); }
-    if (variant===2) { const l=randInt(2,20); return maakSom(`${l} liter = ... milliliter`, l*1000); }
-    if (variant===3) { const min=randInt(2,8)*15; return maakSom(`${min} minuten = ... uur`, String(min/60)); }
-    const euro=randInt(5,80); const cent=pickRandom([5,10,20,25,50,75]);
-    return maakSom(`€${euro},${String(cent).padStart(2,'0')} = ... cent`, euro*100+cent);
+    const niveau=instellingen.niveau||CONFIG.defaultNiveau;
+    if(niveau==='begin5'||niveau==='groep6'&&Math.random()<0.5){
+        const items=[
+            ['Een potlood is [N] ... lang.',5,22,'cm'],
+            ['Een boom is [N] ... hoog.',3,20,'m'],
+            ['Een kind weegt [N] ... .',20,45,'kg'],
+            ['In een kan past [N] ... water.',1,5,'l'],
+            ['Een gang is [N] ... lang.',3,25,'m'],
+            ['Een schrift is [N] ... breed.',12,25,'cm'],
+            ['Een zak aardappels weegt [N] ... .',1,10,'kg']
+        ];
+        const [tekst,min,max,eenheid]=pickRandom(items),n=randInt(min,max);
+        const vraag=tekst.replace('[N]',n)+' Welke eenheid ontbreekt? Typ cm, m, kg of l.';
+        return maakSom(vraag,eenheid,'meten');
+    }
+    const basis=niveau==='midden5'||niveau==='groep6';
+    const omzettingen=basis?[[100,'meter','centimeter'],[1000,'kilogram','gram']]:[[100,'meter','centimeter'],[1000,'kilogram','gram'],[1000,'liter','milliliter'],[10,'centimeter','millimeter'],[1000,'kilometer','meter']];
+    const [factor,van,naar]=pickRandom(omzettingen),n=randInt(1,basis?9:40);
+    if(basis||Math.random()<0.5)return maakSom(`${n} ${van} = ... ${naar}`,n*factor,'meten');
+    const deel=randInt(1,9)*factor/10;
+    return maakSom(`${n*factor+deel} ${naar} = ... ${van}`,Number((n+deel/factor).toFixed(2)),'meten');
 }
 
 function genMeetkunde(instellingen) {
-    const variant = randInt(0, 7);
-    const l = randInt(4, 28), b = randInt(3, 20), h = randInt(2, 12);
+    const niveau=instellingen.niveau||CONFIG.defaultNiveau;
+    const variant=pickRandom(niveau==='midden5'?[0,3]:niveau==='groep6'?[0,1,3]:niveau==='midden6'?[0,1,3,4,5]:niveau==='groep7'?[0,1,2,3,4,5,6]:[0,1,2,3,4,5,6,7]);
+    const l=randInt(4,niveau==='midden5'?10:20),b=randInt(3,niveau==='midden5'?9:15),h=randInt(2,12);
     if (variant === 0) return maakSom(`Een rechthoekig schoolplein is ${l} m lang en ${b} m breed. Wat is de omtrek in meter?`, 2 * (l + b));
     if (variant === 1) return maakSom(`Een tuin is ${l} m lang en ${b} m breed. Wat is de oppervlakte in m²?`, l * b);
     if (variant === 2) return maakSom(`Een doos is ${l} cm lang, ${b} cm breed en ${h} cm hoog. Wat is de inhoud in cm³?`, l * b * h);
@@ -461,13 +524,19 @@ function maakKlokHTML(uur, minuut) {
 }
 
 function genKlokkijken(instellingen) {
-    const niveau = instellingen.niveau;
-    let minuten = [0,30];
-    if (niveau === 'midden4') minuten = [0,5,10,15,20,25,30,35,40,45,50,55];
-    if (['begin5','midden5'].includes(niveau)) minuten = [0,5,10,15,20,25,30,35,40,45,50,55];
-    const uur = randInt(1,12), minuut = pickRandom(minuten);
-    const antwoord = `${String(uur).padStart(2,'0')}:${String(minuut).padStart(2,'0')}`;
-    return maakSom('Hoe laat is het op de klok? Typ bijvoorbeeld 08:30.', antwoord, 'klokkijken', { customHTML: maakKlokHTML(uur,minuut) });
+    const niveau=instellingen.niveau||CONFIG.defaultNiveau;
+    const hoger=['groep6','midden6','groep7','midden7'].includes(niveau);
+    const variant=hoger?randInt(0,2):0;
+    const stap=niveau==='begin4'?30:['midden6','groep7','midden7'].includes(niveau)?1:5;
+    const minuut=randInt(0,60/stap-1)*stap,uur=randInt(1,12);
+    if(variant===0){
+        const antwoord=`${String(uur).padStart(2,'0')}:${String(minuut).padStart(2,'0')}`;
+        return maakSom('Hoe laat is het op de klok? Typ bijvoorbeeld 08:30.',antwoord,'klokkijken',{customHTML:maakKlokHTML(uur,minuut),signature:`analoog:${antwoord}`});
+    }
+    const start=randInt(0,23)*60+minuut,duur=randInt(1,niveau==='groep6'?8:24)*(niveau==='groep6'?15:5);
+    const tijd=n=>`${String(Math.floor((n%1440)/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`;
+    if(variant===1)return maakSom(`Het is ${tijd(start)}. Hoe laat is het ${duur} minuten later? Typ de tijd in 24-uursnotatie.`,tijd(start+duur),'klokkijken');
+    return maakSom(`Je vertrekt om ${tijd(start)} en komt ${start+duur>=1440?'de volgende dag ':''}om ${tijd(start+duur)} aan. Hoeveel minuten duurt de reis?`,duur,'klokkijken');
 }
 
 function geldHTML(items) {
@@ -493,8 +562,8 @@ function maakBetaalSet(doel, waarden) {
 }
 function genGeld(instellingen) {
     const niveau=instellingen.niveau;
-    const metCenten=['begin5','midden5','groep6','groep7'].includes(niveau);
-    const waarden=metCenten?[0.5,1,2,5,10,20,50]:[1,2,5,10,20,50];
+    const metCenten=!niveau.includes('4');
+    const waarden=metCenten?[0.5,1,2,5,10,20,50]:[1,2,5,10];
     const variant=niveau==='begin4'?randInt(0,1):randInt(0,4);
     if(variant===0){
         const aantal=randInt(3,niveau==='begin4'?5:8); const items=Array.from({length:aantal},()=>pickRandom(waarden)).sort((a,b)=>b-a);
@@ -587,7 +656,7 @@ function genInformatie(instellingen) {
         return maakSom('Wie las de minste bladzijden? Typ de naam.',labels[i],'informatie',{customHTML:maakStaafdiagramHTML(labels,waarden,'Gelezen bladzijden'),signature:`minste4:${waarden.join('-')}`});
     }
 
-    if(niveau==='begin5'){
+    if(niveau==='begin5'||niveau==='midden5'){
         const variant=randInt(0,5);
         if(variant===0){ const labels=['ma','di','wo','do','vr'], waarden=labels.map(()=>randInt(3,15)), i=randInt(0,4); return maakSom(vraag([`Hoeveel bezoekers waren er op ${labels[i]}?`,`Welk bezoekersaantal hoort bij ${labels[i]}?`,`Lees af hoeveel mensen op ${labels[i]} kwamen.`]),waarden[i],'informatie',{customHTML:maakStaafdiagramHTML(labels,waarden,'Bezoekers bibliotheek'),signature:`staaf5:${waarden.join('-')}:${i}`}); }
         if(variant===1){ const lengtes=['1,40–1,45','1,45–1,50','1,50–1,55','1,55–1,60']; const jongens=lengtes.map(()=>randInt(1,5)), meisjes=lengtes.map(()=>randInt(1,5)), i=randInt(0,3); return maakSom(vraag([`Hoeveel kinderen zijn samen tussen ${lengtes[i]} meter lang?`,`Tel jongens en meisjes in de rij ${lengtes[i]} bij elkaar op.`,`Hoeveel kinderen vallen in de lengtegroep ${lengtes[i]} meter?`]),jongens[i]+meisjes[i],'informatie',{customHTML:maakTabelHTML(['Lengte (m)','Jongens','Meisjes'],lengtes.map((l,j)=>[l,jongens[j],meisjes[j]])),signature:`freq:${jongens.join('-')}:${meisjes.join('-')}:${i}`}); }
@@ -620,11 +689,15 @@ function genStrategie(instellingen) {
         const stap=niveau==='begin4'?pickRandom([1,2,5]):pickRandom([2,5,10]); const min=0, stappen=10, max=stap*stappen; const markerIndex=randInt(1,stappen-1);
         return maakSom(`Bekijk de getallenlijn. Begin bij 0 en tel per streepje ${stap} verder. Welk getal hoort bij het pijltje?`,markerIndex*stap,'strategie',{customHTML:maakGetallenlijnHTML(min,max,stappen,markerIndex),signature:`lijn:${min}:${stap}:${markerIndex}`});
     }
-    const variant=randInt(0,3);
-    if(variant===0){ const stap=pickRandom([5,10,20,25,50]); const stappen=8, markerIndex=randInt(1,stappen-1); return maakSom(`Bekijk de getallenlijn. Begin bij 0 en tel steeds ${stap} verder. Welk getal hoort bij het pijltje?`,markerIndex*stap,'strategie',{customHTML:maakGetallenlijnHTML(0,stap*stappen,stappen,markerIndex),signature:`lijn:${stap}:${markerIndex}`}); }
-    if(variant===1){ const a=randInt(120,899), b=pickRandom([98,99,198,199]); return maakSom(`Reken handig. ${b} ligt vlak bij ${b<150?100:200}. Tel eerst het ronde getal erbij en haal daarna het teveel eraf.\n${a} + ${b} =`,a+b,'strategie'); }
-    if(variant===2){ const a=randInt(400,999); let b=pickRandom([98,99,198,199,298,299]); if(b>=a)b=98; const rond=Math.round(b/100)*100; return maakSom(`Reken handig. ${b} ligt vlak bij ${rond}. Trek eerst ${rond} af en tel daarna het verschil terug.\n${a} − ${b} =`,a-b,'strategie'); }
-    const rond=pickRandom([100,200,500,1000]), verschil=randInt(1,9); return maakSom(`Maak eerst een rond getal: ${rond-verschil} heeft nog ${verschil} nodig om ${rond} te worden.\n${rond-verschil} + ${verschil*2} =`,rond+verschil,'strategie');
+    const max=getalgrens(instellingen),variant=randInt(0,2);
+    if(variant===0){
+        const stap=pickRandom(max<=100?[1,2,5,10]:max<=1000?[5,10,20,25]:[10,25,50,100]);
+        const marker=randInt(1,7);
+        return maakSom(`Tel vanaf 0 steeds ${stap} verder. Welk getal hoort bij het pijltje?`,marker*stap,'strategie',{customHTML:maakGetallenlijnHTML(0,stap*8,8,marker),signature:`lijn:${stap}:${marker}`});
+    }
+    const rond=max<=100?10:max<=1000?100:1000,verschil=randInt(1,9),b=rond-verschil,a=randInt(rond,Math.min(max-rond,rond*4));
+    if(variant===1)return maakSom(`Tel eerst ${rond} erbij en haal daarna ${verschil} eraf. ${a} + ${b} =`,a+b,'strategie');
+    return maakSom(`Trek eerst ${rond} af en tel daarna ${verschil} terug. ${a} - ${b} =`,a-b,'strategie');
 }
 
 /* ============================================================
@@ -640,9 +713,9 @@ const CATEGORIES = {
     delen: { label: 'Delen', icon: '➗', sub: 'Eerlijk verdelen en grote deelsommen', generator: genDelen },
     klokkijken: { label: 'Klokkijken', icon: '🕒', sub: 'Analoog en digitaal', generator: genKlokkijken },
     geld: { label: 'Geld', icon: '💶', sub: 'Munten, biljetten en bedragen', generator: genGeld },
-    breuken: { label: 'Breuken', icon: '🍕', sub: 'Vanaf groep 6 met opbouw', generator: genBreuken },
+    breuken: { label: 'Breuken', icon: '🍕', sub: 'Van halven en kwarten naar breukrekenen', generator: genBreuken },
     breukencontext: { label: 'Breuken in context', icon: '🍫', sub: 'Breuk van een hoeveelheid', generator: genBreukenContext },
-    kommagetallen: { label: 'Kommagetallen', icon: '🔸', sub: 'Optellen, aftrekken, × en :', generator: genKommagetallen },
+    kommagetallen: { label: 'Kommagetallen', icon: '🔸', sub: 'Van tienden herkennen naar bewerkingen', generator: genKommagetallen },
     procenten: { label: 'Procenten', icon: '💯', sub: 'Van basis naar toepassing', generator: genProcenten },
     verhoudingen: { label: 'Verhoudingen & schaal', icon: '⚖️', sub: 'Verhoudingstabel en kaart', generator: genVerhoudingen },
     meten: { label: 'Meten & omrekenen', icon: '📏', sub: 'Lengte, gewicht, inhoud en tijd', generator: genMeten },
@@ -1093,6 +1166,7 @@ function toonLengteWaarschuwingIndienNodig(l) {
 }
 
 function setBereik(r) {
+    r=Math.max(20,Math.min(LEVELS[state.niveau].maxGetal,r));
     state.getalbereik = r;
     document.querySelectorAll('#bereikGroep .btn-sub').forEach(b => {
         b.classList.toggle('active', parseInt(b.dataset.bereik, 10) === r);
@@ -1109,12 +1183,15 @@ function setNiveau(niveau) {
     document.getElementById('niveauUitleg').textContent = profiel.uitleg;
     document.getElementById('headerLevelText').textContent = profiel.label;
     state.getalbereik = profiel.maxGetal;
-    state.selectedTafels = profiel.tafels.slice(0, Math.min(4, profiel.tafels.length));
+    state.selectedTafels = profiel.tafels.slice();
     state.selectedCategories = state.selectedCategories.filter(cat => profiel.categories.includes(cat));
     bouwTegels();
     bouwTafelCheckboxes();
     document.getElementById('tafelInlinePanel').style.display = state.selectedCategories.includes('tafels') ? 'block' : 'none';
-    document.getElementById('bereikGroep').closest('.config-block').style.display = ['begin4','midden4','begin5','midden5'].includes(niveau) ? 'none' : 'block';
+    const bereikGroep=document.getElementById('bereikGroep');
+    bereikGroep.querySelectorAll('[data-bereik]').forEach(b=>{b.hidden=Number(b.dataset.bereik)>profiel.maxGetal;});
+    bereikGroep.closest('.config-block').style.display=profiel.maxGetal<=1000?'none':'block';
+    setBereik(profiel.maxGetal);
 }
 
 function toggleSomPaneel(panelId, knop) {
@@ -1451,7 +1528,7 @@ function updateHistoryUI() {
 
 function bepaalInvoerEigenschappen(somObj, categorie) {
     const verwacht = String(somObj.antwoord ?? '').trim();
-    if (categorie === 'klokkijken') {
+    if (categorie === 'klokkijken' && /^\d{1,2}:\d{2}$/.test(verwacht)) {
         return 'inputmode="numeric" pattern="[0-9:]*" maxlength="5" autocomplete="off" data-input-type="clock"';
     }
     if (/^-?\d+$/.test(verwacht)) {
